@@ -6,7 +6,15 @@ I want to migrate my notes and TODOs to Anytype for long-term usage. Before doin
 
 - https://community.anytype.io/t/development-pace-roadmap-for-2025/22101/10
 
-## design
+## open source
+
+- https://github.com/orgs/anyproto/discussions/1
+- https://legal.any.coop/
+- https://github.com/anyproto/anytype-ts/issues/79#issuecomment-1648571661
+
+## design & tech
+
+- https://github.com/anyproto/tech-docs
 
 - any-sync[protocol]: https://tech.anytype.io/any-sync/overview
   - any-sync-node
