@@ -89,21 +89,29 @@ any-sync-dockercompose-mongo-1-1                     308.5MiB
 any-sync-dockercompose-redis-1                       26.3MiB
 ```
 
-- filenode
+- `any-sync-filenode`
 
   - [ ] [Reduce s3 PUT/GET requests](https://github.com/anyproto/any-sync-filenode/issues/118)
-  - [ ] use fsstore instead of s3store: https://github.com/anyproto/any-sync-filenode/blob/df4bb417e7ea76c80663ff18ba1f2d8d7a32c7e3/cmd/store.go#L1
+  - [x] use fsstore instead of s3store: https://github.com/anyproto/any-sync-filenode/blob/df4bb417e7ea76c80663ff18ba1f2d8d7a32c7e3/cmd/store.go#L1
+
+    ```sh
+    go build -x -v -trimpath -ldflags "-s -w" -buildvcs=false -o any-sync-filenode -tags dev ./cmd
+    ```
+
   - [ ] optional redis
 
 - coordinator
 
-  - [ ] optional mongodb
+  - [ ] [loose coupling MongoDB](https://github.com/anyproto/any-sync-coordinator/issues/80)
 
 - consensusnode
 
-  - [ ] optional mongodb
+  - [ ] [loose coupling MongoDB](https://github.com/anyproto/any-sync-coordinator/issues/80)
+  - [ ] Add https://github.com/256dpi/lungo
+  - [ ] ~~Use FerretDB+Sqlite https://github.com/FerretDB/FerretDB~~
+    > not working, see: https://github.com/FerretDB/FerretDB/blob/main/website/docs/reference/supported-commands.md
 
 - P2P
 
-  - [Debug] show the P2P status: https://github.com/anyproto/anytype-heart/issues/1341
-  - configure peers manually for tailscale: https://github.com/anyproto/anytype-heart/issues/1341
+  - [ ] [Debug] show the P2P status: https://github.com/anyproto/anytype-heart/issues/1341
+  - [ ] configure peers manually for tailscale: https://github.com/anyproto/anytype-heart/issues/1341
