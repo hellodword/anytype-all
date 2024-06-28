@@ -28,6 +28,9 @@ I want to migrate my notes and TODOs to Anytype for long-term usage. Before doin
 
 - https://doc.anytype.io/anytype-docs/data-and-security/how-we-keep-your-data-safe
 - MITM
+- reproducible builds (verify the AppImage): https://github.com/anyproto/anytype-ts/issues/793
+- audit the protocols and implementations
+- audit the clients' dependencies
 - threat model
 
 ## Analytics & Tracking
@@ -55,6 +58,8 @@ Maybe `~/.config/anytype/data`? Not sure.
 - https://github.com/orgs/anyproto/discussions/206
 - https://github.com/anyproto/anytype-heart/blob/6f52f45a6a4caaad384080f291f43276c39cec4e/core/anytype/config/nodes/production.yml
 
+---
+
 ## self-hosted
 
 - https://tech.anytype.io/how-to/self-hosting
@@ -64,3 +69,41 @@ Maybe `~/.config/anytype/data`? Not sure.
 - https://github.com/anyproto/ansible-anysync
 - https://forge.puppetlabs.com/modules/anyproto/anysync/readme
 - Limit users on a self hosted instance: https://github.com/orgs/anyproto/discussions/193
+
+```
+$ docker compose stats --no-stream --format "table {{.Name}}\t{{.MemUsage}}"
+NAME                                                 MEM USAGE
+any-sync-dockercompose-netcheck-1                    19.05MiB
+any-sync-dockercompose-any-sync-node-1-1             31.32MiB
+any-sync-dockercompose-any-sync-filenode-1           43.5MiB
+any-sync-dockercompose-any-sync-consensusnode-1      33.27MiB
+any-sync-dockercompose-any-sync-coordinator-1        35.17MiB
+
+any-sync-dockercompose-generateconfig-processing-1   20.54MiB
+any-sync-dockercompose-generateconfig-anyconf-1      25.71MiB
+
+any-sync-dockercompose-any-sync-node-3-1             31.77MiB
+any-sync-dockercompose-any-sync-node-2-1             32MiB
+any-sync-dockercompose-minio-1                       183.1MiB
+any-sync-dockercompose-mongo-1-1                     308.5MiB
+any-sync-dockercompose-redis-1                       26.3MiB
+```
+
+- filenode
+
+  - [ ] [Reduce s3 PUT/GET requests](https://github.com/anyproto/any-sync-filenode/issues/118)
+  - [ ] use fsstore instead of s3store: https://github.com/anyproto/any-sync-filenode/blob/df4bb417e7ea76c80663ff18ba1f2d8d7a32c7e3/cmd/store.go#L1
+  - [ ] optional redis
+
+- coordinator
+
+  - [ ] optional mongodb
+
+- consensusnode
+
+  - [ ] optional mongodb
+
+- P2P
+
+  - [Debug] show the P2P status: https://github.com/anyproto/anytype-heart/issues/1341
+  - configure peers manually for tailscale: https://github.com/anyproto/anytype-heart/issues/1341
