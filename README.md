@@ -109,7 +109,9 @@ any-sync-dockercompose-redis-1                       26.3MiB
   - [ ] [loose coupling MongoDB](https://github.com/anyproto/any-sync-coordinator/issues/80)
   - [ ] Add https://github.com/256dpi/lungo
   - [ ] ~~Use FerretDB+Sqlite https://github.com/FerretDB/FerretDB~~
-    > not working, see: https://github.com/FerretDB/FerretDB/blob/main/website/docs/reference/supported-commands.md
+    > not working, see:
+    - https://github.com/FerretDB/FerretDB/blob/main/website/docs/reference/supported-commands.md
+    - https://github.com/FerretDB/FerretDB/blob/main/website/docs/diff.md
 
 - P2P
 
