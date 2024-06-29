@@ -1,12 +1,18 @@
 # anytype-all
 
-I want to migrate my notes and TODOs to Anytype for long-term usage. Before doing so, I need to make sure it is secure and reliable.
+I want to migrate my notes and to-dos to Anytype for long-term use. Before doing so, I need to make sure it is secure and reliable.
 
 ## development status
 
+Based on what I can see, it seems quite active.
+
 - https://community.anytype.io/t/development-pace-roadmap-for-2025/22101/10
+- https://github.com/anyproto/anytype-ts/pulse
+- https://github.com/anyproto/anytype-swift/pulse
 
 ## open source
+
+The clients are not really open source; they use the `Any Source Available License`, but I am using it for non-commercial purposes, so it is acceptable for me.
 
 - https://github.com/orgs/anyproto/discussions/1
 - https://legal.any.coop/
@@ -35,8 +41,12 @@ I want to migrate my notes and TODOs to Anytype for long-term usage. Before doin
 
 ## Analytics & Tracking
 
+It's possible to disable analytics and tracking through firewall rules or patches, and an option to disable them will be available.
+
 - https://doc.anytype.io/anytype-docs/data-and-security/analytics-and-tracking
 - https://github.com/orgs/anyproto/projects/1/views/1?pane=issue&itemId=29227689
+
+---
 
 ## client
 
@@ -68,7 +78,8 @@ Maybe `~/.config/anytype/data`? Not sure.
 - https://github.com/anyproto/any-sync-dockercompose
 - https://github.com/anyproto/ansible-anysync
 - https://forge.puppetlabs.com/modules/anyproto/anysync/readme
-- Limit users on a self hosted instance: https://github.com/orgs/anyproto/discussions/193
+
+The official scripts are somewhat heavy:
 
 ```
 $ docker compose stats --no-stream --format "table {{.Name}}\t{{.MemUsage}}"
@@ -89,6 +100,29 @@ any-sync-dockercompose-mongo-1-1                     308.5MiB
 any-sync-dockercompose-redis-1                       26.3MiB
 ```
 
+With [several patches](https://github.com/anyproto/any-sync-dockercompose/pulls?q=is%3Apr+author%3Ahellodword), I am able to run a self-hosted instance without Minio and with only 1 sync node:
+
+```
+any-sync-dockercompose-netcheck-1                19.05MiB
+any-sync-dockercompose-any-sync-filenode-1       46.36MiB
+any-sync-dockercompose-any-sync-node-1-1         42.11MiB
+any-sync-dockercompose-any-sync-consensusnode-1  32.97MiB
+any-sync-dockercompose-any-sync-coordinator-1    34.48MiB
+any-sync-dockercompose-mongo-1-1                 308.6MiB
+any-sync-dockercompose-redis-1                   26.69MiB
+```
+
+MongoDB is the last heavy container, but it is not easy to remove at this time.
+
+---
+
+## TODO
+
+- deploy
+
+  - [ ] generate network, keys and config files
+  - [ ] docker compose
+
 - `any-sync-filenode`
 
   - [ ] [Reduce s3 PUT/GET requests](https://github.com/anyproto/any-sync-filenode/issues/118)
@@ -100,11 +134,11 @@ any-sync-dockercompose-redis-1                       26.3MiB
 
   - [ ] optional redis
 
-- coordinator
+- `any-sync-coordinator`
 
   - [ ] [loose coupling MongoDB](https://github.com/anyproto/any-sync-coordinator/issues/80)
 
-- consensusnode
+- `any-sync-consensusnode`
 
   - [ ] [loose coupling MongoDB](https://github.com/anyproto/any-sync-coordinator/issues/80)
   - [ ] Add https://github.com/256dpi/lungo
@@ -113,7 +147,13 @@ any-sync-dockercompose-redis-1                       26.3MiB
     - https://github.com/FerretDB/FerretDB/blob/main/website/docs/reference/supported-commands.md
     - https://github.com/FerretDB/FerretDB/blob/main/website/docs/diff.md
 
+- `any-sync-node`
+
 - P2P
 
   - [ ] [Debug] show the P2P status: https://github.com/anyproto/anytype-heart/issues/1341
   - [ ] configure peers manually for tailscale: https://github.com/anyproto/anytype-heart/issues/1341
+
+- [Limit users on a self hosted instance](https://github.com/orgs/anyproto/discussions/193)
+
+  > I use it with tailscale, so it's unnecessary for me.
