@@ -100,16 +100,25 @@ any-sync-dockercompose-mongo-1-1                     308.5MiB
 any-sync-dockercompose-redis-1                       26.3MiB
 ```
 
-With [several patches](https://github.com/anyproto/any-sync-dockercompose/pulls?q=is%3Apr+author%3Ahellodword), I am able to run a self-hosted instance without Minio and with only 1 sync node:
+With [several patches](https://github.com/anyproto/any-sync-dockercompose/pulls?q=is%3Apr+author%3Ahellodword) (or [the forked brach](https://github.com/hellodword/any-sync-dockercompose/tree/hellodword)), I am able to run a self-hosted instance without Minio and with only 1 sync node:
 
 ```
-any-sync-dockercompose-netcheck-1                19.05MiB
 any-sync-dockercompose-any-sync-filenode-1       46.36MiB
 any-sync-dockercompose-any-sync-node-1-1         42.11MiB
 any-sync-dockercompose-any-sync-consensusnode-1  32.97MiB
 any-sync-dockercompose-any-sync-coordinator-1    34.48MiB
 any-sync-dockercompose-mongo-1-1                 308.6MiB
 any-sync-dockercompose-redis-1                   26.69MiB
+```
+
+Usage:
+
+```sh
+cat >> .env.override << EOF
+ANY_SYNC_FILENODE_USE_DEV=true
+ANY_SYNC_DISABLE_NETCHECK=true
+ANY_SYNC_HELLODWORD=true
+EOF
 ```
 
 MongoDB is the last heavy container, but it is not easy to remove at this time.
@@ -157,3 +166,7 @@ MongoDB is the last heavy container, but it is not easy to remove at this time.
 - [Limit users on a self hosted instance](https://github.com/orgs/anyproto/discussions/193)
 
   > I use it with tailscale, so it's unnecessary for me.
+
+- backup
+
+  - https://www.mongodb.com/docs/database-tools/mongodump/
