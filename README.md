@@ -104,14 +104,13 @@ any-sync-dockercompose-mongo-1-1                     308.5MiB
 any-sync-dockercompose-redis-1                       26.3MiB
 ```
 
-With [several patches](https://github.com/anyproto/any-sync-dockercompose/pulls?q=is%3Apr+author%3Ahellodword) (or [the forked brach](https://github.com/hellodword/any-sync-dockercompose/tree/hellodword)), I am able to run a self-hosted instance without Minio and with only 1 sync node:
+With [several patches](https://github.com/anyproto/any-sync-dockercompose/pulls?q=is%3Apr+author%3Ahellodword) (or [the forked brach](https://github.com/hellodword/any-sync-dockercompose/tree/hellodword)), I am able to run a self-hosted instance without Minio, MongoDB and with only 1 sync node:
 
 ```
 any-sync-dockercompose-any-sync-filenode-1       46.36MiB
 any-sync-dockercompose-any-sync-node-1-1         42.11MiB
 any-sync-dockercompose-any-sync-consensusnode-1  32.97MiB
 any-sync-dockercompose-any-sync-coordinator-1    34.48MiB
-any-sync-dockercompose-mongo-1-1                 308.6MiB
 any-sync-dockercompose-redis-1                   26.69MiB
 ```
 
@@ -133,10 +132,6 @@ docker compose up --build --remove-orphans -d
 
 # edit the 0.0.0.0 in etc/client.yml
 ```
-
-MongoDB is the last heavy container, but it is not easy to remove at this time.
-
-But mock servers (coordinator and consensusnode) that allow all are acceptable for my use case, because I use it in VPN.
 
 ---
 
@@ -163,12 +158,12 @@ But mock servers (coordinator and consensusnode) that allow all are acceptable f
 - `any-sync-coordinator`
 
   - [ ] [loose coupling MongoDB](https://github.com/anyproto/any-sync-coordinator/issues/80)
+  - [x] [replace mongo with https://github.com/256dpi/lungo](./patches/)
   - [ ] see `DRPCRegister` and `\*rpcHandler\) [A-Z]`
 
 - `any-sync-consensusnode`
 
   - [x] remove mongo by implementing [fakeDB](./patches/)
-  - ~~Try https://github.com/256dpi/lungo~~
   - ~~Use FerretDB+Sqlite https://github.com/FerretDB/FerretDB~~
     > not working, see:
     - https://github.com/FerretDB/FerretDB/blob/main/website/docs/reference/supported-commands.md
