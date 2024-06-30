@@ -32,12 +32,16 @@ The clients are not really open source; they use the `Any Source Available Licen
 
 ## Security
 
+- reproducible builds: https://github.com/anyproto/anytype-ts/issues/793
 - https://doc.anytype.io/anytype-docs/data-and-security/how-we-keep-your-data-safe
-- MITM
-- reproducible builds (verify the AppImage): https://github.com/anyproto/anytype-ts/issues/793
-- audit the protocols and implementations
-- audit the clients' dependencies
-- threat model
+
+For such an app, the security of both the protocols and the clients is a concern. I'm not an expert and can't determine if the protocols are secure. However, there are too many dependencies in the clients, and I don't think they have been well-audited.
+
+However, in the meantime:
+
+1. I use it with a VPN, so the security of the protocols is not a big deal for me.
+2. I use the iOS client, which has many built-in security policies.
+3. I use [the Linux client with hardening](https://github.com/squalus/anytype-flake/issues/2).
 
 ## Analytics & Tracking
 
@@ -142,6 +146,8 @@ But mock servers (coordinator and consensusnode) that allow all are acceptable f
 
   - [ ] generate network, keys and config files
   - [ ] docker compose
+  - [ ] backup
+    - https://www.mongodb.com/docs/database-tools/mongodump/
 
 - `any-sync-filenode`
 
@@ -157,12 +163,13 @@ But mock servers (coordinator and consensusnode) that allow all are acceptable f
 - `any-sync-coordinator`
 
   - [ ] [loose coupling MongoDB](https://github.com/anyproto/any-sync-coordinator/issues/80)
+  - [ ] see `DRPCRegister` and `\*rpcHandler\) [A-Z]`
 
 - `any-sync-consensusnode`
 
-  - [ ] [loose coupling MongoDB](https://github.com/anyproto/any-sync-coordinator/issues/80)
-  - [ ] Add https://github.com/256dpi/lungo
-  - [ ] ~~Use FerretDB+Sqlite https://github.com/FerretDB/FerretDB~~
+  - [x] remove mongo by implementing [fakeDB](./patches/)
+  - ~~Try https://github.com/256dpi/lungo~~
+  - ~~Use FerretDB+Sqlite https://github.com/FerretDB/FerretDB~~
     > not working, see:
     - https://github.com/FerretDB/FerretDB/blob/main/website/docs/reference/supported-commands.md
     - https://github.com/FerretDB/FerretDB/blob/main/website/docs/diff.md
@@ -177,7 +184,3 @@ But mock servers (coordinator and consensusnode) that allow all are acceptable f
 - [Limit users on a self hosted instance](https://github.com/orgs/anyproto/discussions/193)
 
   > I use it with tailscale, so it's unnecessary for me.
-
-- backup
-
-  - https://www.mongodb.com/docs/database-tools/mongodump/
