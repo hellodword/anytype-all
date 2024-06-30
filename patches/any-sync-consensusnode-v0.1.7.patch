@@ -1,0 +1,93 @@
+diff --git a/cmd/consensusnode.go b/cmd/consensusnode.go
+index 3e84aab..85611b5 100644
+--- a/cmd/consensusnode.go
++++ b/cmd/consensusnode.go
+@@ -111,7 +111,7 @@ func Bootstrap(a *app.App) {
+ 		Register(quic.New()).
+ 		Register(secureservice.New()).
+ 		Register(server.New()).
+-		Register(db.New()).
++		Register(db.Fake()).
+ 		Register(stream.New()).
+ 		Register(consensusrpc.New())
+ }
+diff --git a/db/db_fake.go b/db/db_fake.go
+new file mode 100644
+index 0000000..7e3210d
+--- /dev/null
++++ b/db/db_fake.go
+@@ -0,0 +1,74 @@
++package db
++
++import (
++	"context"
++	"encoding/json"
++	"os"
++
++	consensus "github.com/anyproto/any-sync-consensusnode"
++	"github.com/anyproto/any-sync/app"
++	"go.uber.org/zap"
++)
++
++func Fake() Service {
++	return &fakeDB{}
++}
++
++type fakeDB struct {
++}
++
++func (s *fakeDB) Init(a *app.App) (err error) {
++	log.Info("fakeDB.Init")
++	return nil
++}
++
++func (s *fakeDB) Name() (name string) {
++	log.Info("fakeDB.Name")
++	return CName
++}
++
++func (s *fakeDB) Run(ctx context.Context) (err error) {
++	log.Info("fakeDB.Run")
++	return
++}
++
++func (s *fakeDB) Close(ctx context.Context) (err error) {
++	log.Info("fakeDB.Close")
++	return
++}
++
++func (s *fakeDB) AddLog(ctx context.Context, l consensus.Log) (err error) {
++	log.Info("fakeDB.AddLog", zap.Any("consensus.Log", l))
++	b, err := json.Marshal(l)
++	if err != nil {
++		return
++	}
++	return os.WriteFile(l.Id, b, 0644)
++}
++
++func (s *fakeDB) DeleteLog(ctx context.Context, logId string) (err error) {
++	log.Info("fakeDB.DeleteLog", zap.Any("logId", logId))
++	return
++}
++
++func (s *fakeDB) AddRecord(ctx context.Context, logId string, record consensus.Record) (err error) {
++	log.Info("fakeDB.AddRecord", zap.Any("logId", logId), zap.Any("consensus.Record", record))
++	return
++}
++
++func (s *fakeDB) FetchLog(ctx context.Context, logId string) (l consensus.Log, err error) {
++	defer func() {
++		log.Info("fakeDB.FetchLog", zap.Any("logId", logId), zap.Any("consensus.Log", l))
++	}()
++	b, err := os.ReadFile(logId)
++	if err != nil {
++		return
++	}
++	err = json.Unmarshal(b, &l)
++	return
++}
++
++func (s *fakeDB) SetChangeReceiver(receiver ChangeReceiver) (err error) {
++	log.Info("fakeDB.SetChangeReceiver")
++	return
++}

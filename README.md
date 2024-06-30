@@ -132,6 +132,8 @@ docker compose up --build --remove-orphans -d
 
 MongoDB is the last heavy container, but it is not easy to remove at this time.
 
+But mock servers (coordinator and consensusnode) that allow all are acceptable for my use case, because I use it in VPN.
+
 ---
 
 ## TODO
