@@ -114,11 +114,20 @@ any-sync-dockercompose-redis-1                   26.69MiB
 Usage:
 
 ```sh
+git clone --depth=1 -b hellodword https://github.com/hellodword/any-sync-dockercompose
+cd any-sync-dockercompose
+
 cat >> .env.override << EOF
 ANY_SYNC_FILENODE_USE_DEV=true
 ANY_SYNC_DISABLE_NETCHECK=true
 ANY_SYNC_HELLODWORD=true
+EXTERNAL_LISTEN_HOSTS=0.0.0.0
 EOF
+
+make generate_env_and_compose
+docker compose up --build --remove-orphans -d
+
+# edit the 0.0.0.0 in etc/client.yml
 ```
 
 MongoDB is the last heavy container, but it is not easy to remove at this time.
