@@ -1,0 +1,89 @@
+# https://github.com/anyproto/any-sync/blob/main/nodeconf/config.go
+network:
+  id: "$ANY_SYNC_NETWORK_ID"
+  networkId: "$ANY_SYNC_NETWORK_NETWORK_ID"
+  nodes:
+    - addresses:
+        - "$ANY_SYNC_COORDINATOR_HOST:$ANY_SYNC_COORDINATOR_PORT"
+        - "0.0.0.0:$ANY_SYNC_COORDINATOR_PORT"
+        - "quic://$ANY_SYNC_COORDINATOR_HOST:$ANY_SYNC_COORDINATOR_PORT"
+        - "quic://0.0.0.0:$ANY_SYNC_COORDINATOR_PORT"
+        - "$ANY_EXTERNAL_HOST:$ANY_SYNC_COORDINATOR_PORT"
+        - "quic://$ANY_EXTERNAL_HOST:$ANY_SYNC_COORDINATOR_PORT"
+      peerId: "$ANY_SYNC_COORDINATOR_PEER_ID"
+      types:
+        - coordinator
+    - addresses:
+        - "$ANY_SYNC_CONSENSUSNODE_HOST:$ANY_SYNC_CONSENSUSNODE_PORT"
+        - "0.0.0.0:$ANY_SYNC_CONSENSUSNODE_PORT"
+        - "quic://$ANY_SYNC_CONSENSUSNODE_HOST:$ANY_SYNC_CONSENSUSNODE_PORT"
+        - "quic://0.0.0.0:$ANY_SYNC_CONSENSUSNODE_PORT"
+        - "$ANY_EXTERNAL_HOST:$ANY_SYNC_CONSENSUSNODE_PORT"
+        - "quic://$ANY_EXTERNAL_HOST:$ANY_SYNC_CONSENSUSNODE_PORT"
+      peerId: "$ANY_SYNC_CONSENSUSNODE_PEER_ID"
+      types:
+        - consensus
+    - addresses:
+        - "$ANY_SYNC_FILENODE_HOST:$ANY_SYNC_FILENODE_PORT"
+        - "0.0.0.0:$ANY_SYNC_FILENODE_PORT"
+        - "quic://$ANY_SYNC_FILENODE_HOST:$ANY_SYNC_FILENODE_PORT"
+        - "quic://0.0.0.0:$ANY_SYNC_FILENODE_PORT"
+        - "$ANY_EXTERNAL_HOST:$ANY_SYNC_FILENODE_PORT"
+        - "quic://$ANY_EXTERNAL_HOST:$ANY_SYNC_FILENODE_PORT"
+      peerId: "$ANY_SYNC_FILENODE_PEER_ID"
+      types:
+        - file
+    - addresses:
+        - "$ANY_SYNC_NODE_1_HOST:$ANY_SYNC_NODE_1_PORT"
+        - "0.0.0.0:$ANY_SYNC_NODE_1_PORT"
+        - "quic://$ANY_SYNC_NODE_1_HOST:$ANY_SYNC_NODE_1_PORT"
+        - "quic://0.0.0.0:$ANY_SYNC_NODE_1_PORT"
+        - "$ANY_EXTERNAL_HOST:$ANY_SYNC_NODE_1_PORT"
+        - "quic://$ANY_EXTERNAL_HOST:$ANY_SYNC_NODE_1_PORT"
+      peerId: "$ANY_SYNC_NODE_1_PEER_ID"
+      types:
+        - tree
+# https://github.com/anyproto/any-sync/blob/main/metric/config.go
+metric:
+  addr: ""
+# https://github.com/anyproto/any-sync-coordinator/blob/main/config/config.go
+networkStorePath: "/app"
+# https://github.com/anyproto/any-sync/blob/main/accountservice/accountservice.go
+account:
+  peerId: "$ANY_SYNC_COORDINATOR_PEER_ID"
+  peerKey: "$ANY_SYNC_COORDINATOR_PEER_KEY"
+  signingKey: "$ANY_SYNC_COORDINATOR_SIGNING_KEY"
+# https://github.com/anyproto/any-sync-coordinator/blob/main/db/config.go
+mongo:
+  connect: mongodb://mongo-1:27001
+  database: coordinator
+# https://github.com/anyproto/any-sync-coordinator/blob/main/spacestatus/config.go
+spaceStatus:
+  runSeconds: 5
+  deletionPeriodDays: 0
+  # no limit when <= 0
+  spaceLimit: 0
+# https://github.com/anyproto/any-sync/blob/main/net/rpc/drpcconfig.go
+drpc:
+  stream:
+    maxMsgSizeMb: 256
+# https://github.com/anyproto/any-sync/blob/main/net/transport/yamux/config.go
+yamux:
+  listenAddrs:
+    - ":$ANY_SYNC_COORDINATOR_PORT"
+  writeTimeoutSec: 10
+  dialTimeoutSec: 3
+  keepAlivePeriodSec: 0
+# https://github.com/anyproto/any-sync/blob/main/net/transport/quic/config.go
+quic:
+  listenAddrs:
+    - ":$ANY_SYNC_COORDINATOR_PORT"
+  writeTimeoutSec: 10
+  dialTimeoutSec: 10
+  maxStreams: 0
+  keepAlivePeriodSec: 0
+# https://github.com/anyproto/any-sync-coordinator/blob/main/accountlimit/accountlimit.go
+defaultLimits:
+  spaceMembersRead: 1000
+  spaceMembersWrite: 1000
+  sharedSpacesLimit: 1000

@@ -40,7 +40,7 @@ For such an app, the security of both the protocols and the clients is a concern
 However, in the meantime:
 
 1. I use it with a VPN, so the security of the protocols is not a big deal for me.
-2. I use the iOS client, which has many built-in security policies.
+2. I use the iOS client, while iOS has many built-in security policies.
 3. I use [the Linux client with hardening](https://github.com/squalus/anytype-flake/issues/2).
 
 ## Analytics & Tracking
@@ -76,106 +76,34 @@ Maybe `~/.config/anytype/data`? Not sure.
 
 ## self-hosted
 
-- https://tech.anytype.io/how-to/self-hosting
-- https://github.com/orgs/anyproto/discussions/categories/self-hosting?discussions_q=category%3ASelf-hosting+
-- https://github.com/orgs/anyproto/discussions/17
-- https://github.com/anyproto/any-sync-dockercompose
-- https://github.com/anyproto/ansible-anysync
-- https://forge.puppetlabs.com/modules/anyproto/anysync/readme
-
-The official scripts are somewhat heavy:
-
-```
-$ docker compose stats --no-stream --format "table {{.Name}}\t{{.MemUsage}}"
-NAME                                                 MEM USAGE
-any-sync-dockercompose-netcheck-1                    19.05MiB
-any-sync-dockercompose-any-sync-node-1-1             31.32MiB
-any-sync-dockercompose-any-sync-filenode-1           43.5MiB
-any-sync-dockercompose-any-sync-consensusnode-1      33.27MiB
-any-sync-dockercompose-any-sync-coordinator-1        35.17MiB
-
-any-sync-dockercompose-generateconfig-processing-1   20.54MiB
-any-sync-dockercompose-generateconfig-anyconf-1      25.71MiB
-
-any-sync-dockercompose-any-sync-node-3-1             31.77MiB
-any-sync-dockercompose-any-sync-node-2-1             32MiB
-any-sync-dockercompose-minio-1                       183.1MiB
-any-sync-dockercompose-mongo-1-1                     308.5MiB
-any-sync-dockercompose-redis-1                       26.3MiB
-```
-
-With [several patches](https://github.com/anyproto/any-sync-dockercompose/pulls?q=is%3Apr+author%3Ahellodword) (or [the forked brach](https://github.com/hellodword/any-sync-dockercompose/tree/hellodword)), I am able to run a self-hosted instance without Minio, MongoDB and with only 1 sync node:
-
-```
-any-sync-dockercompose-any-sync-filenode-1       46.36MiB
-any-sync-dockercompose-any-sync-node-1-1         42.11MiB
-any-sync-dockercompose-any-sync-consensusnode-1  32.97MiB
-any-sync-dockercompose-any-sync-coordinator-1    34.48MiB
-any-sync-dockercompose-redis-1                   26.69MiB
-```
-
-Usage:
-
-```sh
-git clone --depth=1 -b hellodword https://github.com/hellodword/any-sync-dockercompose
-cd any-sync-dockercompose
-
-cat >> .env.override << EOF
-ANY_SYNC_FILENODE_USE_DEV=true
-ANY_SYNC_DISABLE_NETCHECK=true
-ANY_SYNC_HELLODWORD=true
-EXTERNAL_LISTEN_HOSTS=0.0.0.0
-EOF
-
-make generate_env_and_compose
-docker compose up --build --remove-orphans -d
-
-# edit the 0.0.0.0 in etc/client.yml
-```
-
----
+See [self-hosting.md](./self-hosting.md).
 
 ## TODO
-
-- deploy
-
-  - [ ] generate network, keys and config files
-  - [ ] docker compose
-  - [ ] backup
-    - https://www.mongodb.com/docs/database-tools/mongodump/
 
 - `any-sync-filenode`
 
   - [ ] [Reduce s3 PUT/GET requests](https://github.com/anyproto/any-sync-filenode/issues/118)
-  - [x] use fsstore instead of s3store: https://github.com/anyproto/any-sync-filenode/blob/df4bb417e7ea76c80663ff18ba1f2d8d7a32c7e3/cmd/store.go#L1
-
-    ```sh
-    go build -x -v -trimpath -ldflags "-s -w" -buildvcs=false -o any-sync-filenode -tags dev ./cmd
-    ```
-
+  - [ ] [use fsstore instead of s3store](https://github.com/anyproto/any-sync-dockercompose/pull/78)
   - [ ] optional redis
 
 - `any-sync-coordinator`
 
+  > see `DRPCRegister` and `\*rpcHandler\) [A-Z]`
+
   - [ ] [loose coupling MongoDB](https://github.com/anyproto/any-sync-coordinator/issues/80)
+  - [ ] ~~Use FerretDB+Sqlite https://github.com/FerretDB/FerretDB~~
+    > not working, see:
+    - https://github.com/FerretDB/FerretDB/blob/main/website/docs/reference/supported-commands.md
+    - https://github.com/FerretDB/FerretDB/blob/main/website/docs/diff.md
   - [x] [replace mongo with https://github.com/256dpi/lungo](./patches/)
-  - [ ] see `DRPCRegister` and `\*rpcHandler\) [A-Z]`
 
 - `any-sync-consensusnode`
 
   - [x] remove mongo by implementing [fakeDB](./patches/)
-  - ~~Use FerretDB+Sqlite https://github.com/FerretDB/FerretDB~~
-    > not working, see:
-    - https://github.com/FerretDB/FerretDB/blob/main/website/docs/reference/supported-commands.md
-    - https://github.com/FerretDB/FerretDB/blob/main/website/docs/diff.md
-
-- `any-sync-node`
 
 - P2P
 
-  - [ ] [Debug] show the P2P status: https://github.com/anyproto/anytype-heart/issues/1341
-  - [ ] configure peers manually for tailscale: https://github.com/anyproto/anytype-heart/issues/1341
+  - [ ] [show the P2P status](https://github.com/anyproto/anytype-heart/issues/1341)
+  - [ ] [configure peers manually for non-mDNS tailscale](https://github.com/anyproto/anytype-heart/issues/1341)
 
-- [Limit users on a self hosted instance](https://github.com/orgs/anyproto/discussions/193)
-
-  > I use it with tailscale, so it's unnecessary for me.
+- [ ] ~~[Limit users on a self hosted instance](https://github.com/orgs/anyproto/discussions/193)~~

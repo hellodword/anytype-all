@@ -1,0 +1,28 @@
+# https://github.com/anyproto/any-sync/blob/main/nodeconf/config.go
+id: "$ANY_SYNC_NETWORK_ID"
+networkId: "$ANY_SYNC_NETWORK_NETWORK_ID"
+nodes:
+  - addresses:
+      - "$ANY_EXTERNAL_HOST:$ANY_SYNC_COORDINATOR_PORT"
+      - "quic://$ANY_EXTERNAL_HOST:$ANY_SYNC_COORDINATOR_PORT"
+    peerId: "$ANY_SYNC_COORDINATOR_PEER_ID"
+    types:
+      - coordinator
+  - addresses:
+      - "$ANY_EXTERNAL_HOST:$ANY_SYNC_CONSENSUSNODE_PORT"
+      - "quic://$ANY_EXTERNAL_HOST:$ANY_SYNC_CONSENSUSNODE_PORT"
+    peerId: "$ANY_SYNC_CONSENSUSNODE_PEER_ID"
+    types:
+      - consensus
+  - addresses:
+      - "$ANY_EXTERNAL_HOST:$ANY_SYNC_FILENODE_PORT"
+      - "quic://$ANY_EXTERNAL_HOST:$ANY_SYNC_FILENODE_PORT"
+    peerId: "$ANY_SYNC_FILENODE_PEER_ID"
+    types:
+      - file
+  - addresses:
+      - "$ANY_EXTERNAL_HOST:$ANY_SYNC_NODE_1_PORT"
+      - "quic://$ANY_EXTERNAL_HOST:$ANY_SYNC_NODE_1_PORT"
+    peerId: "$ANY_SYNC_NODE_1_PEER_ID"
+    types:
+      - tree

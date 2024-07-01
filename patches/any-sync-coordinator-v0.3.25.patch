@@ -43,10 +43,10 @@ index 2975a0f..81e87b9 100644
  
  func (c *coordinatorLog) Init(a *app.App) (err error) {
 diff --git a/db/db.go b/db/db.go
-index c4273de..b6a5652 100644
+index c4273de..c0efcbe 100644
 --- a/db/db.go
 +++ b/db/db.go
-@@ -4,10 +4,16 @@ import (
+@@ -4,10 +4,14 @@ import (
  	"context"
  	"github.com/anyproto/any-sync/app"
  	"github.com/anyproto/any-sync/app/logger"
@@ -56,15 +56,13 @@ index c4273de..b6a5652 100644
  	"go.mongodb.org/mongo-driver/mongo/readconcern"
  	"time"
 +	"go.uber.org/zap"
-+	"gopkg.in/yaml.v3"
-+	"fmt"
-+	"os"
 +	"github.com/anyproto/any-sync/nodeconf"
 +	"go.mongodb.org/mongo-driver/bson/primitive"
++	"fmt"
  )
  
  const CName = "coordinator.db"
-@@ -16,8 +22,8 @@ var log = logger.NewNamed(CName)
+@@ -16,8 +20,8 @@ var log = logger.NewNamed(CName)
  
  type Database interface {
  	app.Component
@@ -75,7 +73,7 @@ index c4273de..b6a5652 100644
  }
  
  func New() Database {
-@@ -29,18 +35,22 @@ type mongoProvider interface {
+@@ -29,18 +33,22 @@ type mongoProvider interface {
  }
  
  type database struct {
@@ -96,11 +94,11 @@ index c4273de..b6a5652 100644
  		return err
  	}
  	d.db = client.Database(conf.Database)
-+	confapply(d)
++	confapply(a, d)
  	return
  }
  
-@@ -48,16 +58,16 @@ func (d *database) Name() (name string) {
+@@ -48,16 +56,16 @@ func (d *database) Name() (name string) {
  	return CName
  }
  
@@ -120,12 +118,16 @@ index c4273de..b6a5652 100644
  			if err := txCtx.StartTransaction(); err != nil {
  				return err
  			}
-@@ -77,3 +87,45 @@ func (d *database) Tx(ctx context.Context, f func(txCtx mongo.SessionContext) er
+@@ -77,3 +85,41 @@ func (d *database) Tx(ctx context.Context, f func(txCtx mongo.SessionContext) er
  			return txCtx.CommitTransaction(context.Background())
  		})
  }
 +
-+func confapply(d Database) {
++type nodeConfProvider interface {
++	GetNodeConf() nodeconf.Configuration
++}
++
++func confapply(a *app.App, d Database) {
 +
 +	type ConfModel struct {
 +		Id           primitive.ObjectID `bson:"_id"`
@@ -140,15 +142,7 @@ index c4273de..b6a5652 100644
 +	// var getLastFilter = bson.D{{"enable", true}}
 +	coll := d.Db().Collection(collName)
 +
-+	data, err := os.ReadFile("/etc/any-sync-coordinator/network.yml")
-+	if err != nil {
-+		log.Fatal("can't open network configuration file", zap.Error(err))
-+	}
-+
-+	var nodeConf nodeconf.Configuration
-+	if err = yaml.Unmarshal(data, &nodeConf); err != nil {
-+		log.Fatal("can't parse network configuration file", zap.Error(err))
-+	}
++	nodeConf := a.MustComponent("config").(nodeConfProvider).GetNodeConf()
 +
 +	flagNetworkEnable := true
 +
@@ -160,7 +154,7 @@ index c4273de..b6a5652 100644
 +		Enable:       flagNetworkEnable,
 +	}
 +	ctx := context.Background()
-+	if _, err = coll.InsertOne(ctx, m); err != nil {
++	if _, err := coll.InsertOne(ctx, m); err != nil {
 +		log.Error("InsertOne network", zap.Error(err))
 +		return
 +	}

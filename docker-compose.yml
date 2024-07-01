@@ -1,0 +1,143 @@
+services:
+  redis:
+    restart: always
+    logging:
+      driver: none
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+    image: "redis/redis-stack-server:${REDIS_VERSION}"
+    command:
+      [
+        "redis-server",
+        "--port",
+        "${REDIS_PORT}",
+        "--dir",
+        "/data/",
+        "--appendonly",
+        "yes",
+        "--maxmemory",
+        "256mb",
+        "--maxmemory-policy",
+        "noeviction",
+        "--protected-mode",
+        "no",
+        "--loadmodule",
+        "/opt/redis-stack/lib/redisbloom.so",
+      ]
+    volumes:
+      - "${STORAGE_DIR}/redis/:/data/"
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "-p", "${REDIS_PORT}", "incr", "ping"]
+      interval: 10s
+      timeout: 30s
+      retries: 3
+
+  any-sync-coordinator:
+    restart: on-failure
+    logging:
+      driver: "local"
+      options:
+        max-size: "50m"
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+    build:
+      context: .
+      dockerfile: ./docker/coordinator.Dockerfile
+      args:
+        - ANY_SYNC_COORDINATOR_VERSION=${ANY_SYNC_COORDINATOR_VERSION}
+    ports:
+      - "${ANY_SYNC_COORDINATOR_PORT}:${ANY_SYNC_COORDINATOR_PORT}"
+      - "${ANY_SYNC_COORDINATOR_PORT}:${ANY_SYNC_COORDINATOR_PORT}/udp"
+    volumes:
+      - ./configs/any-sync-coordinator.yml:/app/config.yml:ro
+      - "${STORAGE_DIR}/any-sync-coordinator:/app"
+
+  any-sync-consensusnode:
+    restart: on-failure
+    logging:
+      driver: "local"
+      options:
+        max-size: "50m"
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+    build:
+      context: .
+      dockerfile: ./docker/consensusnode.Dockerfile
+      args:
+        - ANY_SYNC_CONSENSUSNODE_VERSION=${ANY_SYNC_CONSENSUSNODE_VERSION}
+    depends_on:
+      any-sync-coordinator:
+        condition: service_started
+    ports:
+      - "${ANY_SYNC_CONSENSUSNODE_PORT}:${ANY_SYNC_CONSENSUSNODE_PORT}"
+      - "${ANY_SYNC_CONSENSUSNODE_PORT}:${ANY_SYNC_CONSENSUSNODE_PORT}/udp"
+    volumes:
+      - ./configs/any-sync-consensusnode.yml:/app/config.yml:ro
+      - "${STORAGE_DIR}/any-sync-consensusnode:/app"
+
+  any-sync-filenode:
+    restart: on-failure
+    logging:
+      driver: "local"
+      options:
+        max-size: "50m"
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+    build:
+      context: .
+      dockerfile: ./docker/filenode.Dockerfile
+      args:
+        - ANY_SYNC_FILENODE_VERSION=${ANY_SYNC_FILENODE_VERSION}
+    depends_on:
+      redis:
+        condition: service_healthy
+      any-sync-coordinator:
+        condition: service_started
+      any-sync-consensusnode:
+        condition: service_started
+    ports:
+      - "${ANY_SYNC_FILENODE_PORT}:${ANY_SYNC_FILENODE_PORT}"
+      - "${ANY_SYNC_FILENODE_PORT}:${ANY_SYNC_FILENODE_PORT}/udp"
+    volumes:
+      - ./configs/any-sync-filenode.yml:/app/config.yml:ro
+      - "${STORAGE_DIR}/any-sync-filenode:/app"
+      - "${STORAGE_DIR}/any-sync-filenode/storage:/app/storage"
+
+  any-sync-node-1:
+    restart: on-failure
+    logging:
+      driver: "local"
+      options:
+        max-size: "50m"
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+    build:
+      context: .
+      dockerfile: ./docker/node.Dockerfile
+      args:
+        - ANY_SYNC_NODE_VERSION=${ANY_SYNC_NODE_VERSION}
+    depends_on:
+      redis:
+        condition: service_healthy
+      any-sync-coordinator:
+        condition: service_started
+      any-sync-consensusnode:
+        condition: service_started
+      any-sync-filenode:
+        condition: service_started
+    ports:
+      - "${ANY_SYNC_NODE_1_PORT}:${ANY_SYNC_NODE_1_PORT}"
+      - "${ANY_SYNC_NODE_1_PORT}:${ANY_SYNC_NODE_1_PORT}/udp"
+    volumes:
+      - ./configs/any-sync-node-1.yml:/app/config.yml:ro
+      - "${STORAGE_DIR}/any-sync-node-1:/app"
