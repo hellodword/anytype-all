@@ -123,8 +123,6 @@ docker compose up --build --remove-orphans -d
 
 For more details, see [the documentation](https://doc.anytype.io/anytype-docs/data-and-security/self-hosting/self-hosted).
 
-## Backup
-
 ## Ref
 
 - https://tech.anytype.io/how-to/self-hosting

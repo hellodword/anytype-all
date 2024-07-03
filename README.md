@@ -2,7 +2,7 @@
 
 I want to migrate my notes and to-dos to Anytype for long-term use. Before doing so, I need to make sure it is secure and reliable.
 
-## development status
+## Development Status
 
 Based on what I can see, it seems quite active.
 
@@ -10,7 +10,7 @@ Based on what I can see, it seems quite active.
 - https://github.com/anyproto/anytype-ts/pulse
 - https://github.com/anyproto/anytype-swift/pulse
 
-## open source
+## Open Source
 
 The clients are not really open source; they use the `Any Source Available License`, but I am using it for non-commercial purposes, so it is acceptable for me.
 
@@ -18,7 +18,7 @@ The clients are not really open source; they use the `Any Source Available Licen
 - https://legal.any.coop/
 - https://github.com/anyproto/anytype-ts/issues/79#issuecomment-1648571661
 
-## design & tech
+## Design & Tech
 
 - https://github.com/anyproto/tech-docs
 
@@ -49,32 +49,25 @@ It's possible to disable analytics and tracking through firewall rules or patche
 
 - https://doc.anytype.io/anytype-docs/data-and-security/analytics-and-tracking
 - https://github.com/orgs/anyproto/projects/1/views/1?pane=issue&itemId=29227689
+- firewall
+  - https://github.com/orgs/anyproto/discussions/206
+  - https://github.com/anyproto/anytype-heart/blob/6f52f45a6a4caaad384080f291f43276c39cec4e/core/anytype/config/nodes/production.yml
 
----
+## Backup & Restore
 
-## client
+Given that the app does not currently provide extended APIs, I'm going to implement a headless client specifically for exporting, backing up, or restoring data. I believe that this process will also deepen my understanding of the entire ecosystem.
 
-### NixOS
+- See the chrome extension: https://github.com/anyproto/anytype-ts/tree/main/extension and the gRPC https://github.com/anyproto/anytype-heart/blob/main/pb/service/service.pb.go
 
-- pkg
-  - https://github.com/NixOS/nixpkgs/tree/master/pkgs/by-name/an/anytype
-  - https://github.com/nix-community/nur-combined/tree/master/repos/kira-bruneau/pkgs/development/tools/misc/anytype
-  - https://github.com/squalus/anytype-flake
-- keyring: use the option from nixos module, not hm
-  - https://github.com/nix-community/home-manager/issues/1454
-
-### local backup
+- local backup
 
 Maybe `~/.config/anytype/data`? Not sure.
 
-### firewall
+## Extensions
 
-- https://github.com/orgs/anyproto/discussions/206
-- https://github.com/anyproto/anytype-heart/blob/6f52f45a6a4caaad384080f291f43276c39cec4e/core/anytype/config/nodes/production.yml
+- https://github.com/anyproto/roadmap/issues/19
 
----
-
-## self-hosted
+## Self-Hosted
 
 See [self-hosting.md](./self-hosting.md).
 
