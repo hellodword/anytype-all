@@ -35,13 +35,13 @@ The clients are not really open source; they use the `Any Source Available Licen
 - reproducible builds: https://github.com/anyproto/anytype-ts/issues/793
 - https://doc.anytype.io/anytype-docs/data-and-security/how-we-keep-your-data-safe
 
-For such an app, the security of both the protocols and the clients is a concern. I'm not an expert and can't determine if the protocols are secure. However, there are too many dependencies in the clients, and I don't think they have been well-audited.
+For such an app, the security of both the protocols and the clients is a concern. I'm not an expert and can't determine if the protocols are secure. But there are too many dependencies in the clients, and I don't think they have been well-audited.
 
 However, in the meantime:
 
 1. I use it with a VPN, so the security of the protocols is not a big deal for me.
 2. I use the iOS client, while iOS has many built-in security policies.
-3. I use [the Linux client with hardening](https://github.com/squalus/anytype-flake/issues/2).
+3. I use Firejail to run the AnyType on Linux.
 
 ## Analytics & Tracking
 
@@ -55,48 +55,23 @@ It's possible to disable analytics and tracking through firewall rules or patche
 
 ## Backup & Restore
 
-Given that the app does not currently provide extended APIs, I'm going to implement a headless client specifically for exporting, backing up, or restoring data. I believe that this process will also deepen my understanding of the entire ecosystem.
-
-- See the chrome extension: https://github.com/anyproto/anytype-ts/tree/main/extension and the gRPC https://github.com/anyproto/anytype-heart/blob/main/pb/service/service.pb.go
-
-- local backup
-
-Maybe `~/.config/anytype/data`? Not sure.
-
-## Extensions
-
-- https://github.com/anyproto/roadmap/issues/19
+See [backup.md](./backup.md).
 
 ## Self-Hosted
 
 See [self-hosting.md](./self-hosting.md).
 
+## Extensions
+
+- https://github.com/anyproto/roadmap/issues/19
+
 ## TODO
 
-- `any-sync-filenode`
-
-  - [ ] [Reduce s3 PUT/GET requests](https://github.com/anyproto/any-sync-filenode/issues/118)
-  - [ ] [use fsstore instead of s3store](https://github.com/anyproto/any-sync-dockercompose/pull/78)
-  - [ ] optional redis
-
-- `any-sync-coordinator`
-
-  > see `DRPCRegister` and `\*rpcHandler\) [A-Z]`
-
-  - [ ] [loose coupling MongoDB](https://github.com/anyproto/any-sync-coordinator/issues/80)
-  - [ ] ~~Use FerretDB+Sqlite https://github.com/FerretDB/FerretDB~~
-    > not working, see:
-    - https://github.com/FerretDB/FerretDB/blob/main/website/docs/reference/supported-commands.md
-    - https://github.com/FerretDB/FerretDB/blob/main/website/docs/diff.md
-  - [x] [replace mongo with https://github.com/256dpi/lungo](./patches/)
-
-- `any-sync-consensusnode`
-
-  - [x] remove mongo by implementing [fakeDB](./patches/)
-
-- P2P
-
-  - [ ] [show the P2P status](https://github.com/anyproto/anytype-heart/issues/1341)
-  - [ ] [configure peers manually for non-mDNS tailscale](https://github.com/anyproto/anytype-heart/issues/1341)
-
+- [ ] [(any-sync-filenode) Reduce s3 PUT/GET requests](https://github.com/anyproto/any-sync-filenode/issues/118)
+- [ ] (any-sync-filenode) optional redis
+- [ ] [(any-sync-coordinator) loose coupling MongoDB](https://github.com/anyproto/any-sync-coordinator/issues/80)
+- [x] [(any-sync-coordinator) replace mongo with https://github.com/256dpi/lungo](./patches/)
+- [x] (any-sync-consensusnode) remove mongo by implementing [fakeDB](./patches/)
+- [ ] [show the P2P status](https://github.com/anyproto/anytype-heart/issues/1341)
+- [ ] [configure peers manually for non-mDNS tailscale](https://github.com/anyproto/anytype-heart/issues/1341)
 - [ ] ~~[Limit users on a self hosted instance](https://github.com/orgs/anyproto/discussions/193)~~
