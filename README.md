@@ -61,9 +61,9 @@ See [backup.md](./backup.md).
 
 See [self-hosting.md](./self-hosting.md).
 
-## Extensions
+## Extension
 
-- https://github.com/anyproto/roadmap/issues/19
+See [extension.md](./extension.md).
 
 ## TODO
 
