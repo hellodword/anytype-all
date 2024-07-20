@@ -14,20 +14,28 @@
 
   I think [Extism](https://github.com/extism) looks great. It implements a [kernel](https://github.com/extism/extism/blob/main/kernel) in Rust and builds it to `kernel.wasm`, then loads the `kernel.wasm` in the Wasm runtime. It provides official Go SDK (non-CGO), JavaScript SDK, and Java SDK.
 
+- Performance
+
+  Not an issue for such GUI apps, see https://dylibso.com/blog/how-does-extism-work/
+
 - Manifest & Policy
 
-  > Inspired by the [Chromium extension manifest](https://developer.chrome.com/docs/extensions/reference/manifest) and [AWS permissions boundaries](https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_boundaries.html).
+  > Inspired by the [Chromium extension manifest](https://developer.chrome.com/docs/extensions/reference/manifest), [Android Manifest](https://developer.android.com/guide/topics/manifest/manifest-intro) and [AWS permissions boundaries](https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_boundaries.html).
 
+  0. Plugins should never read the key.
   1. Limited memory usage. Provided by Extism.
   2. Limited scope: space/set/object.
   3. Jailed networking (host, IP, port, total size and speed of read and write, time limit).
   4. Filesystem access controls. Provided by Extism.
-  5. Group the gRPC ClientCommands.
+  5. Group the gRPC ClientCommands (Per command or per group, see systemd-analyze syscall-filter).
   6. Limit the content size of gRPC requests.
   7. Pure text or complex content (consider this as potentially more vulnerable).
   8. Storage for each extension.
   9. Listening API.
   10. GUI widgets.
+  11. Dynamically approve or reject some permissions at runtime.
+  12. Clipboard.
+  13. Customize domains for different providers' endpoints, for example: plugins based on LLM services.
 
 - Safe mode
 
@@ -39,13 +47,21 @@
 
 - Developer Mode
 
+- Testing
+
+  - https://extism.org/docs/concepts/testing/
+
+- Communicate with external APPs
+
+  Extend the `AccountLocalLinkNewChallenge`?
+
 - Audited extensions
 
   - Open-sourced.
   - Reproducible.
   - No obfuscated code, [self-documenting](https://en.wikipedia.org/wiki/Self-documenting_code).
   - Principle of least privilege.
-  - E2E testing.
+  - [Formal verification](https://dylibso.com/blog/formally-verified-webassembly-plugins/).
 
 - Supported languages
 
