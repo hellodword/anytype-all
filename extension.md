@@ -2,87 +2,95 @@
 
 - https://github.com/anyproto/roadmap/issues/19
 
-## What I am concerned about
+## Runtime location
 
-- Runtime location
+It definitely should be in the `anytype-heart`, exposing new APIs for clients and providing the ability for the same cross-platform experiences.
 
-  It definitely should be in the `anytype-heart`, exposing new APIs for clients and providing the ability for the same cross-platform experiences.
+It only works when the client is running, not as a headless client for automation. Because the `anytype-heart` already provides this capability, see [this](./README.md#backup--restore).
 
-  It only works when the client is running, not as a headless client for automation. Because the `anytype-heart` already provides this capability, see [this](./README.md#backup--restore).
+## Why
 
-- Why
+I think [Extism](https://github.com/extism) looks great. It implements a [kernel](https://github.com/extism/extism/blob/main/kernel) in Rust and builds it to `kernel.wasm`, then loads the `kernel.wasm` in the Wasm runtime. It provides official Go SDK (non-CGO), JavaScript SDK, and Java SDK.
 
-  I think [Extism](https://github.com/extism) looks great. It implements a [kernel](https://github.com/extism/extism/blob/main/kernel) in Rust and builds it to `kernel.wasm`, then loads the `kernel.wasm` in the Wasm runtime. It provides official Go SDK (non-CGO), JavaScript SDK, and Java SDK.
+## Performance
 
-- Performance
+Not an issue for such GUI apps, see https://dylibso.com/blog/how-does-extism-work/
 
-  Not an issue for such GUI apps, see https://dylibso.com/blog/how-does-extism-work/
+## Manifest & Policy
 
-- Manifest & Policy
+> Inspired by the [Chromium extension manifest](https://developer.chrome.com/docs/extensions/reference/manifest), [Android Manifest](https://developer.android.com/guide/topics/manifest/manifest-intro) and [AWS permissions boundaries](https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_boundaries.html).
 
-  > Inspired by the [Chromium extension manifest](https://developer.chrome.com/docs/extensions/reference/manifest), [Android Manifest](https://developer.android.com/guide/topics/manifest/manifest-intro) and [AWS permissions boundaries](https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_boundaries.html).
+- Plugins should never read the key.
+- Limited memory usage. Provided by Extism.
+- Limited scope: space/set/object.
+- Jailed networking (host, IP, port, total size and speed of read and write, time limit).
+- Filesystem access controls. Provided by Extism.
+- Group the gRPC ClientCommands (Per command or per group, see systemd-analyze syscall-filter).
+- Limit the content size of gRPC requests.
+- Pure text or complex content (consider this as potentially more vulnerable).
+- Storage for each extension.
+- Listening API.
+- GUI widgets.
+- Dynamically approve or reject some permissions at runtime.
+- Clipboard.
+- Customize domains for different providers' endpoints, for example: plugins based on LLM services.
+- Minimal anytype-heart version.
+- Target platforms.
 
-  0. Plugins should never read the key.
-  1. Limited memory usage. Provided by Extism.
-  2. Limited scope: space/set/object.
-  3. Jailed networking (host, IP, port, total size and speed of read and write, time limit).
-  4. Filesystem access controls. Provided by Extism.
-  5. Group the gRPC ClientCommands (Per command or per group, see systemd-analyze syscall-filter).
-  6. Limit the content size of gRPC requests.
-  7. Pure text or complex content (consider this as potentially more vulnerable).
-  8. Storage for each extension.
-  9. Listening API.
-  10. GUI widgets.
-  11. Dynamically approve or reject some permissions at runtime.
-  12. Clipboard.
-  13. Customize domains for different providers' endpoints, for example: plugins based on LLM services.
+## Safe mode
 
-- Safe mode
+> Inspired by Windows Safe Mode and [`--disable-extensions`](https://peter.sh/experiments/chromium-command-line-switches/#disable-extensions) in Chromium.
 
-  > Inspired by Windows Safe Mode.
+If one of the extensions is buggy or vulnerable (e.g., consuming all CPU resources and preventing uninstallation), we need a mechanism to start the application with all extensions disabled.
 
-  Desktop apps can implement this easily. iOS can use the context menu. Android can use app shortcuts. These could serve as entry points for Anytype's safe mode. If one of the extensions is buggy or vulnerable (e.g., consuming all CPU resources and preventing uninstallation), we need a mechanism to start the application with all extensions disabled.
+Desktop apps can implement this easily. iOS can use the context menu. Android can use app shortcuts. These could serve as entry points for Anytype's safe mode.
 
-- Upgrading
+## Installing & Distributing & Upgrading
 
-- Developer Mode
+- Users can add official or third-party repositories via URLs, and can easily remove them, similar to how it's done with [winget source](https://github.com/microsoft/winget-cli/blob/master/doc/windows/package-manager/winget/source.md), [scoop bucket](https://github.com/ScoopInstaller/Scoop/wiki/Buckets), or equivalent tools.
+- Implement signing, similar to the methods used by Mozilla, Chrome, VSCode marketplace, Android APKs, or comparable platforms.
+- Implement upgrade interval checks on the client side.
 
-- Testing
+## Developer Mode
 
-  - https://extism.org/docs/concepts/testing/
+## Testing
 
-- Communicate with external APPs
+- https://extism.org/docs/concepts/testing/
 
-  Extend the `AccountLocalLinkNewChallenge`?
+## Communicate with external APPs
 
-- Audited extensions
+Extend the `AccountLocalLinkNewChallenge`?
 
-  - Open-sourced.
-  - Reproducible.
-  - No obfuscated code, [self-documenting](https://en.wikipedia.org/wiki/Self-documenting_code).
-  - Principle of least privilege.
-  - [Formal verification](https://dylibso.com/blog/formally-verified-webassembly-plugins/).
+## Audited extensions
 
-- Supported languages
+- Open-sourced.
+- Reproducible.
+- No obfuscated code, [self-documenting](https://en.wikipedia.org/wiki/Self-documenting_code).
+- Principle of least privilege.
+- [Formal verification](https://dylibso.com/blog/formally-verified-webassembly-plugins/).
 
-  All languages that support compilation to Wasm are acceptable.
+## Supported languages
 
-- Interpreter & Editor
+All languages that support compilation to Wasm are acceptable.
 
-  I'm not sure. But check [this](https://extism.org/blog/sandboxing-llm-generated-code/), it prepares an `eval` plug-in and evaluates the input JavaScript.
-  
-  In the other side, is this really necessary? Consider Obsidian, which has a successful extension ecosystem and only supports developing extensions with `Node.js`.
+## Interpreter & Editor
 
-- Use cases
+I'm not sure. But check [this](https://extism.org/blog/sandboxing-llm-generated-code/), it prepares an `eval` plug-in and evaluates the input JavaScript.
 
-  > https://obsidian.md/plugins
+In the other side, is this really necessary? Consider Obsidian, which has a successful extension ecosystem and only supports developing extensions with `Node.js`.
 
-  - Publish to a URL or website.
-  - Search pinyin.
-  - LLMs autocomplete.
-  - Image OCR to text.
+## Use cases
+
+> https://obsidian.md/plugins
+
+- Publish to a URL or website.
+- Search pinyin.
+- LLMs autocomplete.
+- Image OCR to text.
 
 ---
+
+## Ref
 
 - https://dylibso.com/blog/how-does-extism-work/
 - https://dylibso.com/blog/plug-in-system-in-hiding/
