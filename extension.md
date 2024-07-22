@@ -48,10 +48,24 @@ Desktop apps can implement this easily. iOS can use the context menu. Android ca
 ## Installing & Distributing & Upgrading
 
 - Users can add official or third-party repositories via URLs, and can easily remove them, similar to how it's done with [winget source](https://github.com/microsoft/winget-cli/blob/master/doc/windows/package-manager/winget/source.md), [scoop bucket](https://github.com/ScoopInstaller/Scoop/wiki/Buckets), or equivalent tools.
-- Implement signing, similar to the methods used by Mozilla, Chrome, VSCode marketplace, Android APKs, or comparable platforms.
 - Implement upgrade interval checks on the client side.
 
+## Signing
+
+> Similar to the methods used by Mozilla, Chrome, VSCode marketplace, Android APKs, or comparable platforms.
+
 ## Developer Mode
+
+> The developer mode is inspired by Chromium's developer mode.
+
+The developer mode will ignore the signing, allowing developers to load any extensions, including unpacked extensions.
+
+Anytype clients should repeatedly display a prominent warning when users try to enable developer mode.
+
+To limit the developer mode:
+
+- Automatically disable or uninstall the extension after 3 restarts of Anytype.
+- Automatically disable or uninstall the extension after 12 hours.
 
 ## Testing
 
@@ -78,6 +92,8 @@ All languages that support compilation to Wasm are acceptable.
 I'm not sure. But check [this](https://extism.org/blog/sandboxing-llm-generated-code/), it prepares an `eval` plug-in and evaluates the input JavaScript.
 
 In the other side, is this really necessary? Consider Obsidian, which has a successful extension ecosystem and only supports developing extensions with `Node.js`.
+
+## Feedback & TestFlight
 
 ## Use cases
 
