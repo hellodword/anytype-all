@@ -104,6 +104,14 @@ In the other side, is this really necessary? Consider Obsidian, which has a succ
 - LLMs autocomplete.
 - Image OCR to text.
 
+## Platform restrictions
+
+- iOS: Apple rejects runtimes. How did Obsidian get approved by the App Store?
+- Android:
+- macOS:
+- Windows:
+- AppImage:
+
 ---
 
 ## Ref
