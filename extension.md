@@ -14,7 +14,9 @@ I think [Extism](https://github.com/extism) looks great. It implements a [kernel
 
 ## Performance
 
-Not an issue for such GUI apps, see https://dylibso.com/blog/how-does-extism-work/
+Performance is not an issue for such GUI apps; see https://dylibso.com/blog/how-does-extism-work/
+
+However, it might be an issue for iOS because there is no AOT mode allowed by default.
 
 ## Manifest & Policy
 
@@ -62,7 +64,7 @@ The developer mode will ignore the signing, allowing developers to load any exte
 
 Anytype clients should repeatedly display a prominent warning when users try to enable developer mode.
 
-To limit the developer mode:
+To limit the developer mode (or not?):
 
 - Automatically disable or uninstall the extension after 3 restarts of Anytype.
 - Automatically disable or uninstall the extension after 12 hours.
@@ -106,7 +108,13 @@ In the other side, is this really necessary? Consider Obsidian, which has a succ
 
 ## Platform restrictions
 
-- iOS: Apple rejects runtimes. How did Obsidian get approved by the App Store?
+- iOS:
+  - https://github.com/bytecodealliance/wasm-micro-runtime/issues/242
+  - https://github.com/bytecodealliance/wasm-micro-runtime/wiki/Performance
+  - https://developer.apple.com/documentation/apple-silicon/porting-just-in-time-compilers-to-apple-silicon
+  - https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-jit
+  - https://github.com/bytecodealliance/wasm-micro-runtime/blob/main/product-mini/platforms/ios/generate_xcodeproj.sh
+  - https://github.com/extism/wamr-sdk
 - Android:
 - macOS:
 - Windows:
