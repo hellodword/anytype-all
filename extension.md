@@ -109,12 +109,25 @@ In the other side, is this really necessary? Consider Obsidian, which has a succ
 ## Platform restrictions
 
 - iOS:
-  - https://github.com/bytecodealliance/wasm-micro-runtime/issues/242
-  - https://github.com/bytecodealliance/wasm-micro-runtime/wiki/Performance
+
   - https://developer.apple.com/documentation/apple-silicon/porting-just-in-time-compilers-to-apple-silicon
   - https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-jit
-  - https://github.com/bytecodealliance/wasm-micro-runtime/blob/main/product-mini/platforms/ios/generate_xcodeproj.sh
+
+  - https://github.com/wasmerio/wasmer/issues/4343#issuecomment-1877472566
+  - https://github.com/oliveeyay/SwiftWasmer
+
   - https://github.com/extism/wamr-sdk
+  - https://github.com/bytecodealliance/wasm-micro-runtime/issues/242
+  - https://github.com/bytecodealliance/wasm-micro-runtime/wiki/Performance
+  - https://github.com/bytecodealliance/wasm-micro-runtime/blob/main/product-mini/platforms/ios/generate_xcodeproj.sh
+  - https://github.com/bytecodealliance/wasm-micro-runtime/blob/main/doc/embed_wamr.md
+
+  - https://github.com/wasm3/wasm3/blob/main/README.md#motivation
+  - https://shareup.app/blog/using-webassembly-on-ios/
+  - https://github.com/matiasinsaurralde/go-wasm3/pull/6
+
+  - https://github.com/swiftwasm/WasmKit
+
 - Android:
 - macOS:
 - Windows:
