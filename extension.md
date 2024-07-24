@@ -110,6 +110,10 @@ In the other side, is this really necessary? Consider Obsidian, which has a succ
 
 - iOS:
 
+  - https://developer.apple.com/support/terms/apple-developer-program-license-agreement/#b331
+
+  - https://extism.org/docs/questions/#can-i-use-extism-with-my-own-webassembly-runtime
+
   - https://developer.apple.com/documentation/apple-silicon/porting-just-in-time-compilers-to-apple-silicon
   - https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-jit
 
