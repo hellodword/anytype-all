@@ -117,6 +117,9 @@ In the other side, is this really necessary? Consider Obsidian, which has a succ
   - https://developer.apple.com/documentation/apple-silicon/porting-just-in-time-compilers-to-apple-silicon
   - https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-jit
 
+  - https://github.com/tetratelabs/wazero/blob/main/README.md#runtime
+  - https://pkg.go.dev/github.com/extism/go-sdk#PluginConfig
+
   - https://github.com/wasmerio/wasmer/issues/4343#issuecomment-1877472566
   - https://github.com/oliveeyay/SwiftWasmer
 
