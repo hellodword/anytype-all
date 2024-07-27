@@ -9,7 +9,10 @@
 
 ```sh
 cd ../anytype-heart
-make setup-protoc
+# make setup-protoc
+# make setup-protoc-go
+# make setup-protoc-jsweb
+make protos && make protos-docs && make protos-go && make protos-gomobile && make protos-java && make protos-js && make protos-server
 make install-dev-js
 
 cd ../anytype-ts

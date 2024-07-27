@@ -16,7 +16,7 @@ I think [Extism](https://github.com/extism) looks great. It implements a [kernel
 
 Performance is not an issue for such GUI apps; see https://dylibso.com/blog/how-does-extism-work/
 
-However, it might be an issue for iOS because there is no AOT mode allowed by default.
+However, it might be an issue for iOS because there is no JIT allowed by default.
 
 ## Manifest & Policy
 
@@ -139,6 +139,18 @@ In the other side, is this really necessary? Consider Obsidian, which has a succ
 - macOS:
 - Windows:
 - AppImage:
+
+## Bucket
+
+## Misc
+
+|                  | anytype-heart | anytype-ts | anytype-kotlin | anytype-swift |
+| ---------------- | ------------- | ---------- | -------------- | ------------- |
+| SetEndpoint      | API           | Input      | Input          | Input         |
+| SetMode          | API           | CheckBox   | CheckBox       | CheckBox      |
+| InstallByID      | API           | Input      | Input          | Input         |
+| add GUI elements | -             | Dynamic    | Dynamic        | Dynamic       |
+| Safe mode        | -             | Entry      | Entry          | Entry         |
 
 ---
 
