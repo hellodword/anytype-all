@@ -1,0 +1,25 @@
+{
+  // "image": "ghcr.io/hellodword/devcontainers-images-go-and-node"
+  "remoteUser": "vscode",
+  "dockerFile": "Dockerfile",
+  "context": "${localWorkspaceFolder}",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "dbaeumer.vscode-eslint",
+        "editorconfig.editorconfig",
+        "esbenp.prettier-vscode",
+        "golang.go",
+        "shd101wyy.markdown-preview-enhanced"
+      ]
+    }
+  },
+  "runArgs": [
+    // "--device",
+    // "/dev/dri",
+    "-v",
+    "/tmp/.X11-unix:/tmp/.X11-unix",
+    "-e",
+    "DISPLAY=${env:DISPLAY}"
+  ]
+}
