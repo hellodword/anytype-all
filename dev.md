@@ -16,6 +16,7 @@ make protos && make protos-docs && make protos-go && make protos-gomobile && mak
 make install-dev-js
 
 cd ../anytype-ts
+. .env
 npm run start:watch
-npm run start:electron-wait-webpack
+env MNEMONIC="$MNEMONIC" npm run start:electron-wait-webpack 2>&1 | tee .log
 ```
