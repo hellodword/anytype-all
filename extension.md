@@ -38,6 +38,7 @@ However, it might be an issue for iOS because there is no JIT allowed by default
 - Customize domains for different providers' endpoints, for example: plugins based on LLM services.
 - Minimal anytype-heart version.
 - Target platforms.
+- Background thread.
 
 ## Safe mode
 
@@ -140,7 +141,13 @@ In the other side, is this really necessary? Consider Obsidian, which has a succ
 - Windows:
 - AppImage:
 
-## Bucket
+## Management
+
+- Store
+- Search
+- Install
+- Uninstall
+- Per extension settings
 
 ## Misc
 
