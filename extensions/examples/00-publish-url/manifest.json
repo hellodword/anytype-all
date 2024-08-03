@@ -1,5 +1,6 @@
 {
   "$schema": "https://github.com/hellodword/anytype-all/raw/master/extensions/manifest.schema.json",
+  "manifest_version": 1,
   "name": "Publish URL",
   "id": "cce03473-4377-490c-9c8e-523068c7a3dd",
   "description": "",

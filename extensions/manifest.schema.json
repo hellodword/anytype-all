@@ -23,6 +23,10 @@
       "type": "string",
       "enum": ["space", "set", "page", "object"]
     },
+    "platform": {
+      "type": "string",
+      "enum": ["android", "ios", "linux", "windows", "darwin"]
+    },
     "function": {
       "type": "object",
       "properties": {
@@ -112,20 +116,19 @@
     },
     "scopes": {
       "description": "space/set/object",
-      "default": null,
-      "type": ["array", "null"],
+      "type": "array",
       "items": {
         "$ref": "#/definitions/scope"
-      }
+      },
+      "minItems": 1
     },
     "platforms": {
       "description": "ios/android/linux/windows/darwin",
-      "default": null,
-      "type": ["array", "null"],
+      "type": "array",
       "items": {
-        "type": "string",
-        "enum": ["android", "ios", "linux", "windows", "darwin"]
-      }
+        "$ref": "#/definitions/platform"
+      },
+      "minItems": 1
     },
     "functions": {
       "default": null,
@@ -134,5 +137,13 @@
         "$ref": "#/definitions/function"
       }
     }
-  }
+  },
+  "required": [
+    "manifest_version",
+    "id",
+    "name",
+    "version",
+    "scopes",
+    "platforms"
+  ]
 }
