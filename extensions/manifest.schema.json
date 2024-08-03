@@ -9,15 +9,54 @@
       "type": "string",
       "pattern": "^(?:\\d{1,5}\\.){0,3}\\d{1,5}$"
     },
+    "uuid": {
+      "type": "string",
+      "pattern": "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
+    },
     "icon": {
       "$ref": "#/definitions/uri"
     },
     "uri": {
       "type": "string"
+    },
+    "scope": {
+      "type": "string",
+      "enum": ["space", "set", "page", "object"]
+    },
+    "function": {
+      "type": "object",
+      "properties": {
+        "function_name": {
+          "type": "string",
+          "description": "The name of exported functions",
+          "minLength": 1,
+          "maxLength": 64
+        },
+        "entries": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "scope": {
+                "$ref": "#/definitions/scope"
+              },
+              "text": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 32
+              }
+            }
+          }
+        }
+      }
     }
   },
   "properties": {
-    "extism" : {
+    "id": {
+      "description": "The unique identifier for extension. (A UUID specified by RFC4122).",
+      "$ref": "#/definitions/uuid"
+    },
+    "extism": {
       "$ref": "https://raw.githubusercontent.com/extism/extism/main/manifest/schema.json",
       "description": "https://github.com/extism/docs/blob/main/docs/concepts/manifest.md"
     },
@@ -45,19 +84,19 @@
       "description": "One or more icons that represent the extension, app, or theme. Recommended format: PNG; also BMP, GIF, ICO, JPEG.",
       "minProperties": 1,
       "properties": {
-        "16": {
+        "icon16": {
           "$ref": "#/definitions/icon",
           "description": "Used as the favicon for an extension's pages and infobar."
         },
-        "48": {
+        "icon48": {
           "$ref": "#/definitions/icon",
           "description": "Used on the extension management page."
         },
-        "128": {
+        "icon128": {
           "$ref": "#/definitions/icon",
           "description": "Used during installation and in the Store."
         },
-        "256": {
+        "icon256": {
           "$ref": "#/definitions/icon",
           "description": "Used during installation and in the Store."
         }
@@ -72,14 +111,28 @@
       "description": "The version of anytype-heart that your extension, app, or theme requires, if any."
     },
     "scopes": {
-      "description": "space/set/object"
+      "description": "space/set/object",
+      "default": null,
+      "type": ["array", "null"],
+      "items": {
+        "$ref": "#/definitions/scope"
+      }
     },
     "platforms": {
-      "description": "ios/android/linux/windows/darwin"
+      "description": "ios/android/linux/windows/darwin",
+      "default": null,
+      "type": ["array", "null"],
+      "items": {
+        "type": "string",
+        "enum": ["android", "ios", "linux", "windows", "darwin"]
+      }
     },
-    "commands": {
-      "description": "gRPC ClientCommands, DeviceList or @device"
-    },
-    "permissions": {}
+    "functions": {
+      "default": null,
+      "type": ["array", "null"],
+      "items": {
+        "$ref": "#/definitions/function"
+      }
+    }
   }
 }

@@ -1,0 +1,11 @@
+{
+  "$schema": "https://github.com/hellodword/anytype-all/raw/master/extensions/manifest.schema.json",
+  "name": "Publish URL",
+  "id": "cce03473-4377-490c-9c8e-523068c7a3dd",
+  "description": "",
+  "version": "0.1",
+  "homepage_url": "https://github.com/hellodword/anytype-all/blob/master/examples/00-publish-url",
+  "scopes": ["object"],
+  "platforms": ["linux"],
+  "functions": []
+}
