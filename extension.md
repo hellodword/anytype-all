@@ -169,3 +169,5 @@ In the other side, is this really necessary? Consider Obsidian, which has a succ
 - https://github.com/obsidianmd/obsidian-help/blob/ce06db8fd3ae0f90e6e5c56d4a8f82d8ab37f0a8/en/Extending%20Obsidian/Plugin%20security.md#plugin-capabilities
 - https://github.com/extism/extism/discussions/684
 - https://github.com/1Password/onepassword-sdk-go
+- https://wazero.io/languages/tinygo/
+- https://go.dev/blog/wasi
