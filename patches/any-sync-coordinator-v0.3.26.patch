@@ -1,0 +1,477 @@
+diff --git a/accountlimit/accountlimit.go b/accountlimit/accountlimit.go
+index 668b66b..049a0e7 100644
+--- a/accountlimit/accountlimit.go
++++ b/accountlimit/accountlimit.go
+@@ -12,7 +12,7 @@ import (
+ 	"github.com/anyproto/any-sync/net/pool"
+ 	"github.com/anyproto/any-sync/nodeconf"
+ 	"go.mongodb.org/mongo-driver/bson"
+-	"go.mongodb.org/mongo-driver/mongo"
++	mongo "github.com/256dpi/lungo"
+ 	"go.mongodb.org/mongo-driver/mongo/options"
+ 	"storj.io/drpc"
+ 
+@@ -59,7 +59,7 @@ type AccountLimit interface {
+ type accountLimit struct {
+ 	pool          pool.Pool
+ 	nodeConf      nodeconf.Service
+-	coll          *mongo.Collection
++	coll          mongo.ICollection
+ 	spaceStatus   spacestatus.SpaceStatus
+ 	defaultLimits SpaceLimits
+ }
+diff --git a/coordinatorlog/coordinatorlog.go b/coordinatorlog/coordinatorlog.go
+index 2975a0f..81e87b9 100644
+--- a/coordinatorlog/coordinatorlog.go
++++ b/coordinatorlog/coordinatorlog.go
+@@ -6,7 +6,7 @@ import (
+ 	"time"
+ 
+ 	"github.com/anyproto/any-sync/app"
+-	"go.mongodb.org/mongo-driver/mongo"
++	mongo "github.com/256dpi/lungo"
+ 
+ 	"github.com/anyproto/any-sync-coordinator/db"
+ )
+@@ -33,7 +33,7 @@ func New() CoordinatorLog {
+ }
+ 
+ type coordinatorLog struct {
+-	logColl *mongo.Collection
++	logColl mongo.ICollection
+ }
+ 
+ func (c *coordinatorLog) Init(a *app.App) (err error) {
+diff --git a/db/db.go b/db/db.go
+index c4273de..6f5b685 100644
+--- a/db/db.go
++++ b/db/db.go
+@@ -4,10 +4,14 @@ import (
+ 	"context"
+ 	"github.com/anyproto/any-sync/app"
+ 	"github.com/anyproto/any-sync/app/logger"
+-	"go.mongodb.org/mongo-driver/mongo"
++	mongo "github.com/256dpi/lungo"
+ 	"go.mongodb.org/mongo-driver/mongo/options"
+ 	"go.mongodb.org/mongo-driver/mongo/readconcern"
+ 	"time"
++	"go.uber.org/zap"
++	"github.com/anyproto/any-sync/nodeconf"
++	"go.mongodb.org/mongo-driver/bson/primitive"
++	"fmt"
+ )
+ 
+ const CName = "coordinator.db"
+@@ -16,8 +20,8 @@ var log = logger.NewNamed(CName)
+ 
+ type Database interface {
+ 	app.Component
+-	Db() *mongo.Database
+-	Tx(ctx context.Context, f func(txCtx mongo.SessionContext) error) error
++	Db() mongo.IDatabase
++	Tx(ctx context.Context, f func(txCtx mongo.ISessionContext) error) error
+ }
+ 
+ func New() Database {
+@@ -29,18 +33,22 @@ type mongoProvider interface {
+ }
+ 
+ type database struct {
+-	db *mongo.Database
++	db mongo.IDatabase
+ }
+ 
+ func (d *database) Init(a *app.App) (err error) {
+ 	conf := a.MustComponent("config").(mongoProvider).GetMongo()
+ 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
+ 	defer cancel()
+-	client, err := mongo.Connect(ctx, options.Client().ApplyURI(conf.Connect))
++	opts := mongo.Options{
++		Store: mongo.NewFileStore("any-sync-coordinator.db", 0644),
++	}
++	client, _, err := mongo.Open(ctx, opts)
+ 	if err != nil {
+ 		return err
+ 	}
+ 	d.db = client.Database(conf.Database)
++	confapply(a, d)
+ 	return
+ }
+ 
+@@ -48,16 +56,16 @@ func (d *database) Name() (name string) {
+ 	return CName
+ }
+ 
+-func (d *database) Db() *mongo.Database {
++func (d *database) Db() mongo.IDatabase {
+ 	return d.db
+ }
+ 
+-func (d *database) Tx(ctx context.Context, f func(txCtx mongo.SessionContext) error) error {
++func (d *database) Tx(ctx context.Context, f func(txCtx mongo.ISessionContext) error) error {
+ 	client := d.db.Client()
+ 	return client.UseSessionWithOptions(
+ 		ctx,
+ 		options.Session().SetDefaultReadConcern(readconcern.Majority()),
+-		func(txCtx mongo.SessionContext) error {
++		func(txCtx mongo.ISessionContext) error {
+ 			if err := txCtx.StartTransaction(); err != nil {
+ 				return err
+ 			}
+@@ -77,3 +85,41 @@ func (d *database) Tx(ctx context.Context, f func(txCtx mongo.SessionContext) er
+ 			return txCtx.CommitTransaction(context.Background())
+ 		})
+ }
++
++type nodeConfProvider interface {
++	GetNodeConf() nodeconf.Configuration
++}
++
++func confapply(a *app.App, d Database) {
++
++	type ConfModel struct {
++		Id           primitive.ObjectID `bson:"_id"`
++		NetworkId    string             `bson:"networkId"`
++		Nodes        []nodeconf.Node    `bson:"nodes"`
++		CreationTime time.Time          `bson:"creationTime"`
++		Enable       bool               `bson:"enable"`
++	}
++
++	const collName = "nodeConf"
++	// var getLastSort = options.FindOne().SetSort(bson.D{{"_id", -1}})
++	// var getLastFilter = bson.D{{"enable", true}}
++	coll := d.Db().Collection(collName)
++
++	nodeConf := a.MustComponent("config").(nodeConfProvider).GetNodeConf()
++
++	flagNetworkEnable := true
++
++	m := ConfModel{
++		Id:           primitive.NewObjectID(),
++		NetworkId:    nodeConf.NetworkId,
++		Nodes:        nodeConf.Nodes,
++		CreationTime: time.Now(),
++		Enable:       flagNetworkEnable,
++	}
++	ctx := context.Background()
++	if _, err := coll.InsertOne(ctx, m); err != nil {
++		log.Error("InsertOne network", zap.Error(err))
++		return
++	}
++	fmt.Println(m.Id.Hex())
++}
+\ No newline at end of file
+diff --git a/deletionlog/deletionlog.go b/deletionlog/deletionlog.go
+index 66728e9..0fdd9c1 100644
+--- a/deletionlog/deletionlog.go
++++ b/deletionlog/deletionlog.go
+@@ -9,7 +9,7 @@ import (
+ 	"github.com/anyproto/any-sync/coordinator/coordinatorproto"
+ 	"go.mongodb.org/mongo-driver/bson"
+ 	"go.mongodb.org/mongo-driver/bson/primitive"
+-	"go.mongodb.org/mongo-driver/mongo"
++	mongo "github.com/256dpi/lungo"
+ 	"go.mongodb.org/mongo-driver/mongo/options"
+ 
+ 	"github.com/anyproto/any-sync-coordinator/db"
+@@ -50,7 +50,7 @@ const (
+ )
+ 
+ type deletionLog struct {
+-	coll *mongo.Collection
++	coll mongo.ICollection
+ }
+ 
+ func (d *deletionLog) Init(a *app.App) (err error) {
+diff --git a/go.mod b/go.mod
+index 32a27a6..4561d4f 100644
+--- a/go.mod
++++ b/go.mod
+@@ -18,6 +18,7 @@ require (
+ 
+ require (
+ 	filippo.io/edwards25519 v1.1.0 // indirect
++	github.com/256dpi/lungo v0.3.7 // indirect
+ 	github.com/anyproto/go-chash v0.1.0 // indirect
+ 	github.com/anyproto/go-slip10 v1.0.0 // indirect
+ 	github.com/anyproto/go-slip21 v1.0.0 // indirect
+@@ -77,8 +78,10 @@ require (
+ 	github.com/prometheus/common v0.48.0 // indirect
+ 	github.com/prometheus/procfs v0.12.0 // indirect
+ 	github.com/quic-go/quic-go v0.42.0 // indirect
++	github.com/shopspring/decimal v1.3.1 // indirect
+ 	github.com/spaolacci/murmur3 v1.1.0 // indirect
+ 	github.com/supranational/blst v0.3.11 // indirect
++	github.com/tidwall/btree v1.7.0 // indirect
+ 	github.com/tyler-smith/go-bip39 v1.1.0 // indirect
+ 	github.com/xdg-go/pbkdf2 v1.0.0 // indirect
+ 	github.com/xdg-go/scram v1.1.2 // indirect
+@@ -99,6 +102,7 @@ require (
+ 	golang.org/x/time v0.5.0 // indirect
+ 	golang.org/x/tools v0.19.0 // indirect
+ 	google.golang.org/protobuf v1.32.0 // indirect
++	gopkg.in/tomb.v2 v2.0.0-20161208151619-d5d1b5820637 // indirect
+ 	lukechampine.com/blake3 v1.2.1 // indirect
+ 	rsc.io/tmplfunc v0.0.3 // indirect
+ )
+diff --git a/go.sum b/go.sum
+index c81121d..ca996b4 100644
+--- a/go.sum
++++ b/go.sum
+@@ -1,5 +1,7 @@
+ filippo.io/edwards25519 v1.1.0 h1:FNf4tywRC1HmFuKW5xopWpigGjJKiJSV0Cqo0cJWDaA=
+ filippo.io/edwards25519 v1.1.0/go.mod h1:BxyFTGdWcka3PhytdK4V28tE5sGfRvvvRV7EaN4VDT4=
++github.com/256dpi/lungo v0.3.7 h1:2tX3oOaeQP2GpLj7eqMaIAHBGmEkrvXSZmqDACOzOjU=
++github.com/256dpi/lungo v0.3.7/go.mod h1:r69kf9biVOiUB6LGKtceM2YwIIF/QRGruhQIKFN6J/U=
+ github.com/DataDog/zstd v1.4.5 h1:EndNeuB0l9syBZhut0wns3gV1hL8zX8LIu6ZiVHWLIQ=
+ github.com/DataDog/zstd v1.4.5/go.mod h1:1jcaCB/ufaK+sKp1NBhlGmpz41jOoPQ35bpF36t7BBo=
+ github.com/OneOfOne/xxhash v1.2.2 h1:KMrpdQIwFcEqXDklaen+P1axHaj9BSKzvpUUfnHldSE=
+@@ -223,6 +225,8 @@ github.com/rogpeppe/go-internal v1.10.0 h1:TMyTOH3F/DB16zRVcYyreMH6GnZZrwQVAoYjR
+ github.com/rogpeppe/go-internal v1.10.0/go.mod h1:UQnix2H7Ngw/k4C5ijL5+65zddjncjaFoBhdsK/akog=
+ github.com/shirou/gopsutil v3.21.4-0.20210419000835-c7a38de76ee5+incompatible h1:Bn1aCHHRnjv4Bl16T8rcaFjYSrGrIZvpiGO6P3Q4GpU=
+ github.com/shirou/gopsutil v3.21.4-0.20210419000835-c7a38de76ee5+incompatible/go.mod h1:5b4v6he4MtMOwMlS0TUMTu2PcXUg8+E1lC7eC3UO/RA=
++github.com/shopspring/decimal v1.3.1 h1:2Usl1nmF/WZucqkFZhnfFYxxxu8LG21F6nPQBE5gKV8=
++github.com/shopspring/decimal v1.3.1/go.mod h1:DKyhrW/HYNuLGql+MJL6WCR6knT2jwCFRcu2hWCYk4o=
+ github.com/spaolacci/murmur3 v0.0.0-20180118202830-f09979ecbc72/go.mod h1:JwIasOWyU6f++ZhiEuf87xNszmSA2myDM2Kzu9HwQUA=
+ github.com/spaolacci/murmur3 v1.1.0 h1:7c1g84S4BPRrfL5Xrdp6fOJ206sU9y293DDHaoy0bLI=
+ github.com/spaolacci/murmur3 v1.1.0/go.mod h1:JwIasOWyU6f++ZhiEuf87xNszmSA2myDM2Kzu9HwQUA=
+@@ -237,6 +241,8 @@ github.com/supranational/blst v0.3.11 h1:LyU6FolezeWAhvQk0k6O/d49jqgO52MSDDfYgbe
+ github.com/supranational/blst v0.3.11/go.mod h1:jZJtfjgudtNl4en1tzwPIV3KjUnQUvG3/j+w+fVonLw=
+ github.com/syndtr/goleveldb v1.0.1-0.20210819022825-2ae1ddf74ef7 h1:epCh84lMvA70Z7CTTCmYQn2CKbY8j86K7/FAIr141uY=
+ github.com/syndtr/goleveldb v1.0.1-0.20210819022825-2ae1ddf74ef7/go.mod h1:q4W45IWZaF22tdD+VEXcAWRA037jwmWEB5VWYORlTpc=
++github.com/tidwall/btree v1.7.0 h1:L1fkJH/AuEh5zBnnBbmTwQ5Lt+bRJ5A8EWecslvo9iI=
++github.com/tidwall/btree v1.7.0/go.mod h1:twD9XRA5jj9VUQGELzDO4HPQTNJsoWWfYEL+EUQ2cKY=
+ github.com/tklauser/go-sysconf v0.3.12 h1:0QaGUFOdQaIVdPgfITYzaTegZvdCjmYO52cSFAEVmqU=
+ github.com/tklauser/go-sysconf v0.3.12/go.mod h1:Ho14jnntGE1fpdOqQEEaiKRpvIavV0hSfmBq8nJbHYI=
+ github.com/tklauser/numcpus v0.6.1 h1:ng9scYS7az0Bk4OZLvrNXNSAO2Pxr1XXRAPyjhIx+Fk=
+@@ -366,6 +372,8 @@ gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c h1:Hei/4ADfdWqJk1ZMxUNpqntN
+ gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c/go.mod h1:JHkPIbrfpd72SG/EVd6muEfDQjcINNoR0C8j2r3qZ4Q=
+ gopkg.in/fsnotify.v1 v1.4.7/go.mod h1:Tz8NjZHkW78fSQdbUxIjBTcgA1z1m8ZHf0WmKUhAMys=
+ gopkg.in/tomb.v1 v1.0.0-20141024135613-dd632973f1e7/go.mod h1:dt/ZhP58zS4L8KSrWDmTeBkI65Dw0HsyUHuEVlX15mw=
++gopkg.in/tomb.v2 v2.0.0-20161208151619-d5d1b5820637 h1:yiW+nvdHb9LVqSHQBXfZCieqV4fzYhNBql77zY0ykqs=
++gopkg.in/tomb.v2 v2.0.0-20161208151619-d5d1b5820637/go.mod h1:BHsqpu/nsuzkT5BpiH1EMZPLyqSMM8JbIavyFACoFNk=
+ gopkg.in/yaml.v2 v2.2.1/go.mod h1:hI93XBmqTisBFMUTm0b8Fm+jr3Dg1NNxqwp+5A1VGuI=
+ gopkg.in/yaml.v2 v2.2.2/go.mod h1:hI93XBmqTisBFMUTm0b8Fm+jr3Dg1NNxqwp+5A1VGuI=
+ gopkg.in/yaml.v2 v2.2.8/go.mod h1:hI93XBmqTisBFMUTm0b8Fm+jr3Dg1NNxqwp+5A1VGuI=
+diff --git a/identityrepo/identityrepo.go b/identityrepo/identityrepo.go
+index d33eacb..5218ab7 100644
+--- a/identityrepo/identityrepo.go
++++ b/identityrepo/identityrepo.go
+@@ -11,7 +11,7 @@ import (
+ 	"github.com/anyproto/any-sync/net/peer"
+ 	"github.com/anyproto/any-sync/net/rpc/server"
+ 	"go.mongodb.org/mongo-driver/bson"
+-	"go.mongodb.org/mongo-driver/mongo"
++	mongo "github.com/256dpi/lungo"
+ 	"go.mongodb.org/mongo-driver/mongo/options"
+ 
+ 	"github.com/anyproto/any-sync-coordinator/db"
+@@ -44,7 +44,7 @@ type IdentityRepo interface {
+ }
+ 
+ type identityRepo struct {
+-	coll    *mongo.Collection
++	coll    mongo.ICollection
+ 	handler *rpcHandler
+ }
+ 
+diff --git a/nodeconfsource/source.go b/nodeconfsource/source.go
+index 894535d..679bbeb 100644
+--- a/nodeconfsource/source.go
++++ b/nodeconfsource/source.go
+@@ -8,7 +8,7 @@ import (
+ 	"github.com/anyproto/any-sync/nodeconf"
+ 	"go.mongodb.org/mongo-driver/bson"
+ 	"go.mongodb.org/mongo-driver/bson/primitive"
+-	"go.mongodb.org/mongo-driver/mongo"
++	mongo "github.com/256dpi/lungo"
+ 	"go.mongodb.org/mongo-driver/mongo/options"
+ 	"time"
+ )
+@@ -34,7 +34,7 @@ type ConfModel struct {
+ }
+ 
+ type nodeConfSource struct {
+-	coll *mongo.Collection
++	coll mongo.ICollection
+ }
+ 
+ func (n *nodeConfSource) Init(a *app.App) (err error) {
+diff --git a/spacestatus/spacedeleter.go b/spacestatus/spacedeleter.go
+index 37ef817..817322a 100644
+--- a/spacestatus/spacedeleter.go
++++ b/spacestatus/spacedeleter.go
+@@ -6,7 +6,7 @@ import (
+ 
+ 	"github.com/anyproto/any-sync/util/periodicsync"
+ 	"go.mongodb.org/mongo-driver/bson"
+-	"go.mongodb.org/mongo-driver/mongo"
++	mongo "github.com/256dpi/lungo"
+ 	"go.uber.org/zap"
+ )
+ 
+@@ -15,7 +15,7 @@ const deletionTimeout = time.Second * 100
+ type Deleter func(ctx context.Context, spaceId string) (err error)
+ 
+ type SpaceDeleter interface {
+-	Run(spaces *mongo.Collection, delSender Deleter)
++	Run(spaces mongo.ICollection, delSender Deleter)
+ 	Close()
+ }
+ 
+@@ -70,7 +70,7 @@ type StatusEntry struct {
+ }
+ 
+ type spaceDeleter struct {
+-	spaces         *mongo.Collection
++	spaces         mongo.ICollection
+ 	runSeconds     int
+ 	deletionPeriod time.Duration
+ 	loop           periodicsync.PeriodicSync
+@@ -86,7 +86,7 @@ func newSpaceDeleter(runSeconds int, deletionPeriod time.Duration) SpaceDeleter
+ 	}
+ }
+ 
+-func (s *spaceDeleter) Run(spaces *mongo.Collection, deleter Deleter) {
++func (s *spaceDeleter) Run(spaces mongo.ICollection, deleter Deleter) {
+ 	s.deleter = deleter
+ 	s.spaces = spaces
+ 	s.loop = periodicsync.NewPeriodicSync(s.runSeconds, deletionTimeout, s.delete, log)
+@@ -120,7 +120,7 @@ func (s *spaceDeleter) delete(ctx context.Context) (err error) {
+ 	return
+ }
+ 
+-func (s *spaceDeleter) processEntry(ctx context.Context, cur *mongo.Cursor) (err error) {
++func (s *spaceDeleter) processEntry(ctx context.Context, cur mongo.ICursor) (err error) {
+ 	entry := &StatusEntry{}
+ 	err = cur.Decode(entry)
+ 	if err != nil {
+diff --git a/spacestatus/spacestatus.go b/spacestatus/spacestatus.go
+index 838eb1c..665eb70 100644
+--- a/spacestatus/spacestatus.go
++++ b/spacestatus/spacestatus.go
+@@ -11,7 +11,7 @@ import (
+ 	"github.com/anyproto/any-sync/coordinator/coordinatorproto"
+ 	"github.com/anyproto/any-sync/util/crypto"
+ 	"go.mongodb.org/mongo-driver/bson"
+-	"go.mongodb.org/mongo-driver/mongo"
++	mongo "github.com/256dpi/lungo"
+ 	"go.mongodb.org/mongo-driver/mongo/options"
+ 	"go.uber.org/zap"
+ 
+@@ -104,7 +104,7 @@ func New() SpaceStatus {
+ 
+ type spaceStatus struct {
+ 	conf           Config
+-	spaces         *mongo.Collection
++	spaces         mongo.ICollection
+ 	verifier       ChangeVerifier
+ 	deleter        SpaceDeleter
+ 	db             db.Database
+@@ -173,7 +173,7 @@ func (s *spaceStatus) AccountDelete(ctx context.Context, payload AccountDeletion
+ 		deletionTimestamp    = tm.Unix()
+ 		toBeDeletedTimestamp = tm.Add(s.deletionPeriod).Unix()
+ 	)
+-	err = s.db.Tx(ctx, func(txCtx mongo.SessionContext) error {
++	err = s.db.Tx(ctx, func(txCtx mongo.ISessionContext) error {
+ 		// Find personal space with SpaceStatusCreated status for the given identity
+ 		if !s.accountStatusFindTx(txCtx, identity, SpaceStatusCreated) {
+ 			return coordinatorproto.ErrAccountIsDeleted
+@@ -223,7 +223,7 @@ func (s *spaceStatus) AccountRevertDeletion(ctx context.Context, payload Account
+ 	if payload.Identity != nil {
+ 		identity = payload.Identity.Account()
+ 	}
+-	return s.db.Tx(ctx, func(txCtx mongo.SessionContext) error {
++	return s.db.Tx(ctx, func(txCtx mongo.ISessionContext) error {
+ 		if !s.accountStatusFindTx(txCtx, identity, SpaceStatusDeletionPending) {
+ 			return coordinatorproto.ErrUnexpected
+ 		}
+@@ -264,7 +264,7 @@ func (s *spaceStatus) SpaceDelete(ctx context.Context, payload SpaceDeletion) (t
+ 		deletionTimestamp    = tm.Unix()
+ 		toBeDeletedTimestamp = tm.Add(payload.DeletionPeriod).Unix()
+ 	)
+-	err = s.db.Tx(ctx, func(txCtx mongo.SessionContext) error {
++	err = s.db.Tx(ctx, func(txCtx mongo.ISessionContext) error {
+ 		spType, err := s.getSpaceTypeTx(txCtx, payload.SpaceId)
+ 		if err != nil {
+ 			return coordinatorproto.ErrSpaceNotExists
+@@ -301,7 +301,7 @@ func (s *spaceStatus) SpaceDelete(ctx context.Context, payload SpaceDeletion) (t
+ func (s *spaceStatus) ChangeStatus(ctx context.Context, change StatusChange) (entry StatusEntry, err error) {
+ 	switch change.Status {
+ 	case SpaceStatusCreated:
+-		err = s.db.Tx(ctx, func(txCtx mongo.SessionContext) error {
++		err = s.db.Tx(ctx, func(txCtx mongo.ISessionContext) error {
+ 			if entry, err = s.setStatusTx(txCtx, change, SpaceStatusDeletionPending); err != nil {
+ 				return err
+ 			}
+@@ -324,14 +324,14 @@ func (s *spaceStatus) ChangeStatus(ctx context.Context, change StatusChange) (en
+ }
+ 
+ func (s *spaceStatus) setStatus(ctx context.Context, change StatusChange, oldStatus int) (entry StatusEntry, err error) {
+-	err = s.db.Tx(ctx, func(txCtx mongo.SessionContext) error {
++	err = s.db.Tx(ctx, func(txCtx mongo.ISessionContext) error {
+ 		entry, err = s.setStatusTx(txCtx, change, oldStatus)
+ 		return err
+ 	})
+ 	return
+ }
+ 
+-func (s *spaceStatus) setStatusTx(txCtx mongo.SessionContext, change StatusChange, oldStatus int) (entry StatusEntry, err error) {
++func (s *spaceStatus) setStatusTx(txCtx mongo.ISessionContext, change StatusChange, oldStatus int) (entry StatusEntry, err error) {
+ 	entry, err = s.modifyStatus(txCtx, change, oldStatus)
+ 	if err != nil {
+ 		return
+@@ -412,7 +412,7 @@ func (s *spaceStatus) Status(ctx context.Context, spaceId string) (entry StatusE
+ 	return
+ }
+ 
+-func (s *spaceStatus) accountStatusFindTx(txCtx mongo.SessionContext, identity string, status int) (found bool) {
++func (s *spaceStatus) accountStatusFindTx(txCtx mongo.ISessionContext, identity string, status int) (found bool) {
+ 	err := s.spaces.FindOne(txCtx, newPersonalAccountQuery(identity, status)).Err()
+ 	if err == nil {
+ 		return true
+@@ -420,7 +420,7 @@ func (s *spaceStatus) accountStatusFindTx(txCtx mongo.SessionContext, identity s
+ 	return false
+ }
+ 
+-func (s *spaceStatus) getSpaceTypeTx(txCtx mongo.SessionContext, spaceId string) (spaceType SpaceType, err error) {
++func (s *spaceStatus) getSpaceTypeTx(txCtx mongo.ISessionContext, spaceId string) (spaceType SpaceType, err error) {
+ 	var entry StatusEntry
+ 	err = s.spaces.FindOne(txCtx, findStatusQuery{
+ 		SpaceId: spaceId,
+@@ -432,7 +432,7 @@ func (s *spaceStatus) getSpaceTypeTx(txCtx mongo.SessionContext, spaceId string)
+ }
+ 
+ func (s *spaceStatus) NewStatus(ctx context.Context, spaceId string, identity, oldIdentity crypto.PubKey, spaceType SpaceType, force bool) error {
+-	return s.db.Tx(ctx, func(txCtx mongo.SessionContext) error {
++	return s.db.Tx(ctx, func(txCtx mongo.ISessionContext) error {
+ 		if s.accountStatusFindTx(txCtx, identity.Account(), SpaceStatusDeletionPending) {
+ 			return coordinatorproto.ErrAccountIsDeleted
+ 		}
+@@ -478,7 +478,7 @@ func (s *spaceStatus) NewStatus(ctx context.Context, spaceId string, identity, o
+ }
+ 
+ func (s *spaceStatus) MakeShareable(ctx context.Context, spaceId string, limit uint32) (err error) {
+-	return s.db.Tx(ctx, func(txCtx mongo.SessionContext) error {
++	return s.db.Tx(ctx, func(txCtx mongo.ISessionContext) error {
+ 		entry, err := s.Status(txCtx, spaceId)
+ 		if err != nil {
+ 			return err
+@@ -504,7 +504,7 @@ func (s *spaceStatus) MakeShareable(ctx context.Context, spaceId string, limit u
+ }
+ 
+ func (s *spaceStatus) MakeUnshareable(ctx context.Context, spaceId string) (err error) {
+-	return s.db.Tx(ctx, func(txCtx mongo.SessionContext) error {
++	return s.db.Tx(ctx, func(txCtx mongo.ISessionContext) error {
+ 		entry, err := s.Status(txCtx, spaceId)
+ 		if err != nil {
+ 			return err
+@@ -526,7 +526,7 @@ type byIdentityAndStatus struct {
+ 	Status   int    `bson:"status"`
+ }
+ 
+-func (s *spaceStatus) checkLimitTx(txCtx mongo.SessionContext, identity crypto.PubKey) (err error) {
++func (s *spaceStatus) checkLimitTx(txCtx mongo.ISessionContext, identity crypto.PubKey) (err error) {
+ 	if s.conf.SpaceLimit <= 0 {
+ 		return
+ 	}
