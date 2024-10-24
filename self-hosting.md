@@ -47,8 +47,8 @@ $ du --max-depth=1 -h ./storage
 
 ## Compatibility
 
-- anytype-ts: v0.42.8
-- anytype-swift: v0.32.3
+- anytype-ts: v0.43.0
+- anytype-swift: v0.33.0
 
 ## Explanation
 
