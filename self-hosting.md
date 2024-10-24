@@ -45,6 +45,11 @@ $ du --max-depth=1 -h ./storage
 3.7M	./storage
 ```
 
+## Compatibility
+
+- anytype-ts: v0.42.8
+- anytype-swift: v0.32.3
+
 ## Explanation
 
 It's highly personalized, **use at your own risk**.
