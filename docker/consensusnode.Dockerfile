@@ -8,9 +8,9 @@ WORKDIR /usr/src/app
 
 RUN go mod download && go mod verify
 
-COPY patches/"any-sync-consensusnode-${ANY_SYNC_CONSENSUSNODE_VERSION}.patch" .
+COPY patches patches
 
-RUN git apply "any-sync-consensusnode-${ANY_SYNC_CONSENSUSNODE_VERSION}.patch"
+RUN git apply patches/"any-sync-consensusnode-${ANY_SYNC_CONSENSUSNODE_VERSION}.patch"
 
 RUN go build -x -v -trimpath -ldflags "-s -w -X github.com/anyproto/any-sync/app.AppName=any-sync-consensusnode" -buildvcs=false -o /usr/local/bin/any-sync-consensusnode ./cmd
 
