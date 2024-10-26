@@ -1,7 +1,5 @@
 FROM golang:bookworm AS builder
 
-ARG ANY_SYNC_COORDINATOR_VERSION
-
 RUN git clone --depth=1 https://github.com/anyproto/anytype-heart /usr/src/app && rm -rf .git
 
 WORKDIR /usr/src/app
