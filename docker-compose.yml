@@ -47,8 +47,6 @@ services:
     build:
       context: .
       dockerfile: ./docker/coordinator.Dockerfile
-      args:
-        - ANY_SYNC_COORDINATOR_VERSION=${ANY_SYNC_COORDINATOR_VERSION}
     ports:
       - "${ANY_SYNC_COORDINATOR_PORT}:${ANY_SYNC_COORDINATOR_PORT}"
       - "${ANY_SYNC_COORDINATOR_PORT}:${ANY_SYNC_COORDINATOR_PORT}/udp"
@@ -69,8 +67,6 @@ services:
     build:
       context: .
       dockerfile: ./docker/consensusnode.Dockerfile
-      args:
-        - ANY_SYNC_CONSENSUSNODE_VERSION=${ANY_SYNC_CONSENSUSNODE_VERSION}
     depends_on:
       any-sync-coordinator:
         condition: service_started
@@ -94,8 +90,6 @@ services:
     build:
       context: .
       dockerfile: ./docker/filenode.Dockerfile
-      args:
-        - ANY_SYNC_FILENODE_VERSION=${ANY_SYNC_FILENODE_VERSION}
     depends_on:
       redis:
         condition: service_healthy
@@ -124,8 +118,6 @@ services:
     build:
       context: .
       dockerfile: ./docker/node.Dockerfile
-      args:
-        - ANY_SYNC_NODE_VERSION=${ANY_SYNC_NODE_VERSION}
     depends_on:
       redis:
         condition: service_healthy

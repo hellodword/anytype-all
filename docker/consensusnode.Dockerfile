@@ -1,6 +1,6 @@
 FROM golang:bookworm AS builder
 
-ARG ANY_SYNC_CONSENSUSNODE_VERSION
+ARG ANY_SYNC_CONSENSUSNODE_VERSION="v0.2.0"
 
 RUN git clone --depth=1 -b ${ANY_SYNC_CONSENSUSNODE_VERSION} https://github.com/anyproto/any-sync-consensusnode /usr/src/app
 
