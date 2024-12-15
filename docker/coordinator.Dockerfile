@@ -1,6 +1,6 @@
 FROM golang:bookworm AS builder
 
-ARG ANY_SYNC_COORDINATOR_VERSION="v0.4.1"
+ARG ANY_SYNC_COORDINATOR_VERSION="v0.4.4"
 
 RUN git clone --depth=1 -b ${ANY_SYNC_COORDINATOR_VERSION} https://github.com/anyproto/any-sync-coordinator /usr/src/app
 
