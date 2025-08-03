@@ -93,11 +93,9 @@ anyconf add-node --t file --n nodes.yml --account account-filenode.yml --address
 anyconf add-node --t tree --n nodes.yml --account account-node-1.yml --address $ANY_SYNC_NODE_1_HOST:$ANY_SYNC_NODE_1_PORT
 ```
 
-4. Edit `.env` again with the generated `account-*.yml` and `nodes.yml` files:
-
-- The environment variables ending with `_PEER_ID`, `_PEER_KEY`, or `_SIGNING_KEY` are extracted from the account-\*.yml files.
-- The `ANY_SYNC_NETWORK_ID` and `ANY_SYNC_NETWORK_NETWORK_ID` correspond to the `id` and `networkId` in the `nodes.yml` file.
-- The `ANY_EXTERNAL_HOST` is the host you want to use to access the instance. Examples include: `127.0.0.1`, `192.168.10.101`, or `home.foo.ts.net`.
+4. Edit `.env` again:
+- Run `python3 scripts/setup_env.py` to apply new config to `.env`
+- Edit `ANY_EXTERNAL_HOST` is the host you want to use to access the instance. Examples include: `127.0.0.1`, `192.168.10.101`, or `home.foo.ts.net`.
 
 5. Generate config files:
 
