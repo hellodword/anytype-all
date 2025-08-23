@@ -94,7 +94,7 @@ anyconf add-node --t tree --n nodes.yml --account account-node-1.yml --address $
 ```
 
 4. Edit `.env` again:
-- Run `python3 scripts/setup_env.py` to apply new config to `.env`
+- Run `uv run scripts/setup_env.py` to apply new config to `.env`
 - Edit `ANY_EXTERNAL_HOST` is the host you want to use to access the instance. Examples include: `127.0.0.1`, `192.168.10.101`, or `home.foo.ts.net`.
 
 5. Generate config files:
