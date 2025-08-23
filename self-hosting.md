@@ -72,6 +72,7 @@ It's highly personalized, **use at your own risk**.
 ```sh
 cp .env.template .env
 ```
+Edit `ANY_EXTERNAL_HOST` is the host you want to use to access the instance. Examples include: `127.0.0.1`, `192.168.10.101`, or `home.foo.ts.net`.
 
 2. Install `github.com/anyproto/any-sync-tools/anyconf@latest`:
 
@@ -94,27 +95,12 @@ anyconf add-node --t tree --n nodes.yml --account account-node-1.yml --address $
 ```
 
 4. Edit `.env` again:
-- Run `uv run scripts/setup_env.py` to apply new config to `.env`
-- Edit `ANY_EXTERNAL_HOST` is the host you want to use to access the instance. Examples include: `127.0.0.1`, `192.168.10.101`, or `home.foo.ts.net`.
+
+Run `uv run scripts/setup_env.py` to apply new config to `.env`
 
 5. Generate config files:
 
-```sh
-cp configs/any-sync-coordinator.yml.template configs/any-sync-coordinator.yml
-./scripts/apply-env.sh configs/any-sync-coordinator.yml
-
-cp configs/any-sync-consensusnode.yml.template configs/any-sync-consensusnode.yml
-./scripts/apply-env.sh configs/any-sync-consensusnode.yml
-
-cp configs/any-sync-filenode.yml.template configs/any-sync-filenode.yml
-./scripts/apply-env.sh configs/any-sync-filenode.yml
-
-cp configs/any-sync-node-1.yml.template configs/any-sync-node-1.yml
-./scripts/apply-env.sh configs/any-sync-node-1.yml
-
-cp configs/client.yml.template configs/client.yml
-./scripts/apply-env.sh configs/client.yml
-```
+Run `uv run scripts/generate_config.py`
 
 6. Start the Docker Compose setup:
 
