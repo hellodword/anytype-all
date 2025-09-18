@@ -6,6 +6,7 @@ services:
     deploy:
       resources:
         limits:
+          cpus: '0.50'
           memory: 128M
     image: "redis/redis-stack-server:${REDIS_VERSION}"
     command:
